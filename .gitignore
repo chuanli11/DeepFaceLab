@@ -6,3 +6,7 @@
 !requirements*
 !Dockerfile*
 !*.sh
+!.gitignore
+!models/
+!models/*
+models/Model_Lambda/__pycache__/*
