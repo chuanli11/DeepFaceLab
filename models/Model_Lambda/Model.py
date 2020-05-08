@@ -53,7 +53,7 @@ class LambdaModel(ModelBase):
         self.options['write_preview_history'] = False
         self.options['target_iter'] = 1000
         self.options['random_flip'] = False
-        self.options['batch_size'] = 64
+        self.options['batch_size'] = self.batch_size = 64
 
         self.options['resolution'] = 128
         self.options['face_type'] = 'wf'

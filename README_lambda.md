@@ -24,8 +24,7 @@ mkdir data/fauci
 Step one: videoed
 
 ```
-python main.py videoed extract-video --input-file=data/trump/trump.mp4 --output-dir=data/trump/output --output-ext=png --fps=10
-
+python main.py videoed extract-video --input-file=data/trump/trump.mp4 --output-dir=data/trump/output --output-ext=png --fps=10 && \
 python main.py videoed extract-video --input-file=data/fauci/fauci.mp4 --output-dir=data/fauci/output --output-ext=png --fps=2
 ```
 
@@ -36,8 +35,7 @@ GPU utli: spikes between 20% - 50% on a single Quadro RTX 8000
 GPU mem : 5GB
 
 ```
-python main.py extract --detector=s3fd --input-dir=data/trump/output --output-dir=data/trump/face --output-debug --face-type=whole_face --force-gpu-idxs=0
-
+python main.py extract --detector=s3fd --input-dir=data/trump/output --output-dir=data/trump/face --output-debug --face-type=whole_face --force-gpu-idxs=0 && \
 python main.py extract --detector=s3fd --input-dir=data/fauci/output --output-dir=data/fauci/face --output-debug --face-type=whole_face --force-gpu-idxs=0
 ```
 
