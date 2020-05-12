@@ -23,7 +23,7 @@ class SubprocessGenerator(object):
         while not all ([generator._is_started() for generator in generator_list]):
             time.sleep(0.005)
     
-    def __init__(self, generator_func, user_param=None, prefetch=2, start_now=True):
+    def __init__(self, generator_func, user_param=None, prefetch=10, start_now=True):
         super().__init__()
         self.prefetch = prefetch
         self.generator_func = generator_func
@@ -56,6 +56,7 @@ class SubprocessGenerator(object):
                     self.cs_queue.put (None)
                     return
                 self.cs_queue.put (gen_data)
+                # print('{0} added an item, qsize {1}'.format(id(self.cs_queue), self.cs_queue.qsize()))
                 self.prefetch -= 1
             self.sc_queue.get()
             self.prefetch += 1
@@ -70,10 +71,15 @@ class SubprocessGenerator(object):
 
     def __next__(self):
         self._start()
+        # start_t = time.time()
         gen_data = self.cs_queue.get()
+        # print('{0} removed an item, qsize {1}'.format(id(self.cs_queue), self.cs_queue.qsize()))
         if gen_data is None:
             self.p.terminate()
             self.p.join()
             raise StopIteration()
         self.sc_queue.put (1)
+        # end_t = time.time()
+        # print(end_t - start_t)
+
         return gen_data

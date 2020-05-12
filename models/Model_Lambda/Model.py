@@ -11,6 +11,18 @@ from facelib import FaceType
 from models import ModelBase
 from samplelib import *
 
+import time
+
+BATCH_SIZE = 64
+
+warped_src = np.zeros((BATCH_SIZE, 3, 128, 128))
+target_src = np.zeros((BATCH_SIZE, 3, 128, 128))
+target_srcm_all = np.zeros((BATCH_SIZE, 1, 128, 128))
+warped_dst = np.zeros((BATCH_SIZE, 3, 128, 128))
+target_dst = np.zeros((BATCH_SIZE, 3, 128, 128))
+target_dstm_all = np.zeros((BATCH_SIZE, 1, 128, 128))
+
+
 class LambdaModel(ModelBase):
 
     #override
@@ -53,7 +65,7 @@ class LambdaModel(ModelBase):
         self.options['write_preview_history'] = False
         self.options['target_iter'] = 1000
         self.options['random_flip'] = False
-        self.options['batch_size'] = self.batch_size = 64
+        self.options['batch_size'] = self.batch_size = BATCH_SIZE
 
         self.options['resolution'] = 128
         self.options['face_type'] = 'wf'
@@ -528,7 +540,8 @@ class LambdaModel(ModelBase):
 
             random_ct_samples_path=training_data_dst_path if ct_mode is not None and not self.pretrain else None
 
-            cpu_count = min(multiprocessing.cpu_count(), 8)
+            # cpu_count = min(multiprocessing.cpu_count(), 8)
+            cpu_count = 12
             src_generators_count = cpu_count // 2
             dst_generators_count = cpu_count // 2
             if ct_mode is not None:
@@ -572,8 +585,18 @@ class LambdaModel(ModelBase):
     def onTrainOneIter(self):
         bs = self.get_batch_size()
 
+        # start_t = time.time()
         ( (warped_src, target_src, target_srcm_all), \
           (warped_dst, target_dst, target_dstm_all) ) = self.generate_next_samples()
+        # end_t = time.time()
+        # print(end_t - start_t)
+
+        # global warped_src
+        # global target_src 
+        # global target_srcm_all
+        # global warped_dst
+        # global target_dst
+        # global target_dstm_all
 
         src_loss, dst_loss = self.src_dst_train (warped_src, target_src, target_srcm_all, warped_dst, target_dst, target_dstm_all)
 
@@ -602,6 +625,8 @@ class LambdaModel(ModelBase):
             self.D_src_dst_train (warped_src, target_src, target_srcm_all, warped_dst, target_dst, target_dstm_all)
 
         return ( ('src_loss', np.mean(src_loss) ), ('dst_loss', np.mean(dst_loss) ), )
+
+        # return (('src_loss', 0.0 ), ('dst_loss', 0.0 ),)
 
     #override
     def onGetPreview(self, samples):
