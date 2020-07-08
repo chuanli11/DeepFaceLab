@@ -10,6 +10,17 @@ from core.leras import nn
 from facelib import FaceType
 from models import ModelBase
 from samplelib import *
+import time
+
+BATCH_SIZE = 64
+
+warped_src = np.zeros((BATCH_SIZE, 3, 128, 128))
+target_src = np.zeros((BATCH_SIZE, 3, 128, 128))
+target_srcm_all = np.zeros((BATCH_SIZE, 1, 128, 128))
+warped_dst = np.zeros((BATCH_SIZE, 3, 128, 128))
+target_dst = np.zeros((BATCH_SIZE, 3, 128, 128))
+target_dstm_all = np.zeros((BATCH_SIZE, 1, 128, 128))
+
 
 class LambdaModel(ModelBase):
 
@@ -53,11 +64,11 @@ class LambdaModel(ModelBase):
         self.options['write_preview_history'] = False
         self.options['target_iter'] = 1000
         self.options['random_flip'] = False
-        self.options['batch_size'] = self.batch_size = 64
+        self.options['batch_size'] = self.batch_size = BATCH_SIZE
 
         self.options['resolution'] = 128
         self.options['face_type'] = 'wf'
-        self.options['models_opt_on_gpu'] = False
+        self.options['models_opt_on_gpu'] = True
         self.options['archi'] = 'df'
         self.options['ae_dims'] = 128
         self.options['e_dims'] = 64
@@ -528,7 +539,7 @@ class LambdaModel(ModelBase):
 
             random_ct_samples_path=training_data_dst_path if ct_mode is not None and not self.pretrain else None
 
-            cpu_count = min(multiprocessing.cpu_count(), 8)
+            cpu_count = min(multiprocessing.cpu_count(), 96)
             src_generators_count = cpu_count // 2
             dst_generators_count = cpu_count // 2
             if ct_mode is not None:
@@ -572,8 +583,18 @@ class LambdaModel(ModelBase):
     def onTrainOneIter(self):
         bs = self.get_batch_size()
 
+        start_t = time.time()
         ( (warped_src, target_src, target_srcm_all), \
-          (warped_dst, target_dst, target_dstm_all) ) = self.generate_next_samples()
+         (warped_dst, target_dst, target_dstm_all) ) = self.generate_next_samples()
+        end_t = time.time()
+        print(end_t - start_t)
+
+        #global warped_src
+        #global target_src 
+        #global target_srcm_all
+        #global warped_dst
+        #global target_dst
+        #global target_dstm_all
 
         src_loss, dst_loss = self.src_dst_train (warped_src, target_src, target_srcm_all, warped_dst, target_dst, target_dstm_all)
 
@@ -582,6 +603,7 @@ class LambdaModel(ModelBase):
             self.last_dst_samples_loss.append (  (target_dst[i], target_dstm_all[i], dst_loss[i] )  )
 
         if len(self.last_src_samples_loss) >= bs*16:
+
             src_samples_loss = sorted(self.last_src_samples_loss, key=operator.itemgetter(2), reverse=True)
             dst_samples_loss = sorted(self.last_dst_samples_loss, key=operator.itemgetter(2), reverse=True)
 

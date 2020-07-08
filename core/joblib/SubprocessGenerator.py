@@ -2,6 +2,7 @@ import multiprocessing
 import queue as Queue
 import threading
 import time
+import os
 
 
 class SubprocessGenerator(object):
@@ -23,7 +24,7 @@ class SubprocessGenerator(object):
         while not all ([generator._is_started() for generator in generator_list]):
             time.sleep(0.005)
     
-    def __init__(self, generator_func, user_param=None, prefetch=2, start_now=True):
+    def __init__(self, generator_func, user_param=None, prefetch=50, start_now=True):
         super().__init__()
         self.prefetch = prefetch
         self.generator_func = generator_func
