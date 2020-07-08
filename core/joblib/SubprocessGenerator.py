@@ -57,6 +57,7 @@ class SubprocessGenerator(object):
                     self.cs_queue.put (None)
                     return
                 self.cs_queue.put (gen_data)
+                # print('{0} added an item, qsize {1}'.format(id(self.cs_queue), self.cs_queue.qsize()))
                 self.prefetch -= 1
             self.sc_queue.get()
             self.prefetch += 1
@@ -71,10 +72,15 @@ class SubprocessGenerator(object):
 
     def __next__(self):
         self._start()
+        # start_t = time.time()
         gen_data = self.cs_queue.get()
+        # print('{0} removed an item, qsize {1}'.format(id(self.cs_queue), self.cs_queue.qsize()))
         if gen_data is None:
             self.p.terminate()
             self.p.join()
             raise StopIteration()
         self.sc_queue.put (1)
+        # end_t = time.time()
+        # print(end_t - start_t)
+
         return gen_data

@@ -22,6 +22,18 @@ target_dst = np.zeros((BATCH_SIZE, 3, 128, 128))
 target_dstm_all = np.zeros((BATCH_SIZE, 1, 128, 128))
 
 
+import time
+
+BATCH_SIZE = 64
+
+warped_src = np.zeros((BATCH_SIZE, 3, 128, 128))
+target_src = np.zeros((BATCH_SIZE, 3, 128, 128))
+target_srcm_all = np.zeros((BATCH_SIZE, 1, 128, 128))
+warped_dst = np.zeros((BATCH_SIZE, 3, 128, 128))
+target_dst = np.zeros((BATCH_SIZE, 3, 128, 128))
+target_dstm_all = np.zeros((BATCH_SIZE, 1, 128, 128))
+
+
 class LambdaModel(ModelBase):
 
     #override
@@ -624,6 +636,8 @@ class LambdaModel(ModelBase):
             self.D_src_dst_train (warped_src, target_src, target_srcm_all, warped_dst, target_dst, target_dstm_all)
 
         return ( ('src_loss', np.mean(src_loss) ), ('dst_loss', np.mean(dst_loss) ), )
+
+        # return (('src_loss', 0.0 ), ('dst_loss', 0.0 ),)
 
     #override
     def onGetPreview(self, samples):

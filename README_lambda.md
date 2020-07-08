@@ -44,5 +44,11 @@ Step three: train
 ```
 rm -rf output && \
 python main.py train --training-data-src-dir=data/fauci/face --training-data-dst-dir=data/trump/face --model-dir output --model Lambda --force-gpu-idxs 0 --no-preview --force-model-name lambda-t-f
+```
 
+
+### Misc
+
+```
+nvidia-smi --query-gpu=utilization.memory --format=csv -l 5
 ```

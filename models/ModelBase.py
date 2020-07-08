@@ -427,13 +427,16 @@ class ModelBase(object):
         return imagelib.equalize_and_stack_square (images)
 
     def generate_next_samples(self):
-        sample = []        
+        sample = []
+        start_t = time.time()        
         for generator in self.generator_list:
             if generator.is_initialized():
                 sample.append ( generator.generate_next() )
             else:
                 sample.append ( [] )
         self.last_sample = sample
+        end_t = time.time()
+        print(end_t - start_t)
         return sample
 
     def train_one_iter(self):
