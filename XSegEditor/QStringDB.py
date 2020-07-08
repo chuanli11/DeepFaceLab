@@ -34,6 +34,11 @@ class QStringDB():
                                                 'ru' : 'Посмотреть тренированную XSeg маску',
                                                 'zh' : '查看导入后的XSeg遮罩',
                                             }[lang]
+                                            
+        QStringDB.btn_view_xseg_overlay_mask_tip =  {   'en' : 'View trained XSeg mask overlay face',
+                                                        'ru' : 'Посмотреть тренированную XSeg маску поверх лица',
+                                                        'zh' : '查看导入后的XSeg遮罩于脸上方',
+                                                    }[lang]
                                            
         QStringDB.btn_poly_type_include_tip = { 'en' : 'Poly include mode',
                                                 'ru' : 'Режим полигонов - включение',
@@ -79,5 +84,14 @@ class QStringDB():
                                             'ru' : 'Сохранить и следующее изображение\nУдерживать SHIFT : ускорить\nУдерживать CTRL : пропустить неразмеченные\n',
                                             'zh' : '保存并转到下一张图片\n按住SHIFT : 加快\n按住CTRL : 跳过未标记的\n',
                                            }[lang]  
-                                           
+        
+        QStringDB.loading_tip = {'en' : 'Loading',
+                                 'ru' : 'Загрузка',
+                                 'zh' : '正在载入',
+                                }[lang]   
+                                
+        QStringDB.labeled_tip = {'en' : 'labeled',
+                                 'ru' : 'размечено',
+                                 'zh' : '标记的',
+                                }[lang]   
                                            
