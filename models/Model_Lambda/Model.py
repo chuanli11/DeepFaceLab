@@ -15,7 +15,7 @@ from samplelib import *
 USE_SYN = True
 USE_BENCHMARK = True
 RESOLUTION = 128
-BATCH_PER_GPU = 32
+BS_PER_GPU = 32
 NUM_GPU = 1
 
 
@@ -34,7 +34,7 @@ class LambdaModel(ModelBase):
             self.options['write_preview_history'] = False
             self.options['target_iter'] = 1000
             self.options['random_flip'] = False
-            self.options['batch_size'] = self.batch_size = BATCH_PER_GPU * NUM_GPU
+            self.options['batch_size'] = self.batch_size = BS_PER_GPU * NUM_GPU
             self.options['resolution'] = RESOLUTION
             self.options['face_type'] = 'wf'
             self.options['models_opt_on_gpu'] = True
