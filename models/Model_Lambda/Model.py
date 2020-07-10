@@ -11,13 +11,12 @@ from facelib import FaceType
 from models import ModelBase
 from samplelib import *
 
-import time
 
-
-BATCH_SIZE = 64
 USE_SYN = True
-USE_BENCHMARK = False
+USE_BENCHMARK = True
 RESOLUTION = 128
+BATCH_PER_GPU = 32
+NUM_GPU = 1
 
 
 class LambdaModel(ModelBase):
@@ -35,7 +34,7 @@ class LambdaModel(ModelBase):
             self.options['write_preview_history'] = False
             self.options['target_iter'] = 1000
             self.options['random_flip'] = False
-            self.options['batch_size'] = self.batch_size = BATCH_SIZE
+            self.options['batch_size'] = self.batch_size = BATCH_PER_GPU * NUM_GPU
             self.options['resolution'] = RESOLUTION
             self.options['face_type'] = 'wf'
             self.options['models_opt_on_gpu'] = True
@@ -56,12 +55,12 @@ class LambdaModel(ModelBase):
             self.options['pretrain'] = False
 
             if USE_SYN:
-                self.syn_warped_src = np.zeros((BATCH_SIZE, 3, RESOLUTION, RESOLUTION))
-                self.syn_target_src = np.zeros((BATCH_SIZE, 3, RESOLUTION, RESOLUTION))
-                self.syn_target_srcm_all = np.zeros((BATCH_SIZE, 1, RESOLUTION, RESOLUTION))
-                self.syn_warped_dst = np.zeros((BATCH_SIZE, 3, RESOLUTION, RESOLUTION))
-                self.syn_target_dst = np.zeros((BATCH_SIZE, 3, RESOLUTION, RESOLUTION))
-                self.syn_target_dstm_all = np.zeros((BATCH_SIZE, 1, RESOLUTION, RESOLUTION))
+                self.syn_warped_src = np.zeros((self.options['batch_size'], 3, RESOLUTION, RESOLUTION))
+                self.syn_target_src = np.zeros((self.options['batch_size'], 3, RESOLUTION, RESOLUTION))
+                self.syn_target_srcm_all = np.zeros((self.options['batch_size'], 1, RESOLUTION, RESOLUTION))
+                self.syn_warped_dst = np.zeros((self.options['batch_size'], 3, RESOLUTION, RESOLUTION))
+                self.syn_target_dst = np.zeros((self.options['batch_size'], 3, RESOLUTION, RESOLUTION))
+                self.syn_target_dstm_all = np.zeros((self.options['batch_size'], 1, RESOLUTION, RESOLUTION))
         else:
             lowest_vram = 2
             if len(device_config.devices) != 0:
