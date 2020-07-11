@@ -4,8 +4,10 @@ import pandas as pd
 path_config = 'benchmark/log'
 output_file = 'benchmark/benchmark.csv'
 
-list_gpu_type = ['TitanRTX']
-list_config = ['liae_128_128_64_64']
+list_gpu_type = ['QuadroRTX8000']
+list_config = [
+'LambdaSAEHD_liae_128_128_64_64', 'LambdaSAEHD_liae_128_128_64_64_syn', 'LambdaSAEHD_liae_256_128_64_64', 'LambdaSAEHD_liae_256_128_64_64_syn', \
+'LambdaSAEHD_liae_gan_128_128_64_64', 'LambdaSAEHD_liae_gan_128_128_64_64_syn', 'LambdaSAEHD_liae_gan_256_128_64_64', 'LambdaSAEHD_liae_gan_256_128_64_64_syn']
 list_gpu_idxs = ['0', '0,1']
 pattern = "]["
 
@@ -29,14 +31,16 @@ def get_throughput(gpu_type, config, num_gpu):
     time_second_iter = ''
     time_end = ''
     for i, line in enumerate(open(os.path.join(log_file))):
+        if 'batch_size' in line:
+            bs = line.split(' ')[13]
         if pattern in line:
             if count == 1:
                 time_second_iter = line.split('][')[0][1:]
             count += 1
             time_end = line.split('][')[0][1:]
     t = get_time(time_second_iter, time_end)
-
-    return t
+    throughput = float(bs) * (count - 1) / t
+    return throughput
 
 list_row = []
 for gpu_type in list_gpu_type:
