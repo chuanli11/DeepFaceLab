@@ -34,6 +34,7 @@ class ModelBase(object):
                        debug=False,
                        force_model_class_name=None,
                        silent_start=False,
+                       config_file=None,
                        **kwargs):
         self.is_training = is_training
         self.saved_models_path = saved_models_path
@@ -43,7 +44,8 @@ class ModelBase(object):
         self.pretrained_model_path = pretrained_model_path
         self.no_preview = no_preview
         self.debug = debug
-
+        self.config_file=config_file
+        
         self.model_class_name = model_class_name = Path(inspect.getmodule(self).__file__).parent.name.rsplit("_", 1)[1]
 
         if force_model_class_name is None:

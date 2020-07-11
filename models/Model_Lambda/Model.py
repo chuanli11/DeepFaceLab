@@ -3,6 +3,7 @@ import operator
 from functools import partial
 
 import numpy as np
+import yaml
 
 from core import mathlib
 from core.interact import interact as io
@@ -12,11 +13,7 @@ from models import ModelBase
 from samplelib import *
 
 
-USE_SYN = True
-USE_BENCHMARK = True
-RESOLUTION = 128
-BS_PER_GPU = 32
-NUM_GPU = 1
+
 
 
 class LambdaModel(ModelBase):
@@ -24,43 +21,50 @@ class LambdaModel(ModelBase):
     #override
     def on_initialize_options(self):
         device_config = nn.getCurrentDeviceConfig()
-        
-        if USE_BENCHMARK:
-            self.options['masked_training'] = True
-            self.options['uniform_yaw'] = False
-            self.pretrain_just_disabled = True
+        with open(self.config_file) as file:
+            options_list = yaml.load(file, Loader=yaml.FullLoader)
 
-            self.options['autobackup_hour'] = 1
-            self.options['write_preview_history'] = False
-            self.options['target_iter'] = 1000
-            self.options['random_flip'] = False
-            self.options['batch_size'] = self.batch_size = BS_PER_GPU * NUM_GPU
-            self.options['resolution'] = RESOLUTION
-            self.options['face_type'] = 'wf'
-            self.options['models_opt_on_gpu'] = True
-            self.options['archi'] = 'liae'
-            self.options['ae_dims'] = 128
-            self.options['e_dims'] = 64
-            self.options['d_dims'] = 64
-            self.options['d_mask_dims'] = 64
-            self.options['eyes_prio'] = False
-            self.options['lr_dropout'] = True
-            self.options['random_warp'] = False
-            self.options['gan_power'] = 0.0
-            self.options['true_face_power'] = 0.0
-            self.options['face_style_power'] = 0.0
-            self.options['bg_style_power'] = 0.0
-            self.options['ct_mode'] = 'none'
-            self.options['clipgrad'] = False
-            self.options['pretrain'] = False
+        self.options['use_syn'] = options_list['use_syn']
+        self.options['use_benchmark'] = options_list['use_benchmark']
+        self.options['bs_per_gpu'] = options_list['bs_per_gpu']
+        self.options['num_gpu'] = len(device_config.devices)
 
-            if USE_SYN:
-                self.syn_warped_src = np.zeros((self.options['batch_size'], 3, RESOLUTION, RESOLUTION))
-                self.syn_target_src = np.zeros((self.options['batch_size'], 3, RESOLUTION, RESOLUTION))
-                self.syn_target_srcm_all = np.zeros((self.options['batch_size'], 1, RESOLUTION, RESOLUTION))
-                self.syn_warped_dst = np.zeros((self.options['batch_size'], 3, RESOLUTION, RESOLUTION))
-                self.syn_target_dst = np.zeros((self.options['batch_size'], 3, RESOLUTION, RESOLUTION))
-                self.syn_target_dstm_all = np.zeros((self.options['batch_size'], 1, RESOLUTION, RESOLUTION))
+        if self.options['use_benchmark']:            
+            self.options['masked_training'] = options_list['masked_training']
+            self.options['uniform_yaw'] = options_list['uniform_yaw']
+            self.pretrain_just_disabled = options_list['pretrain_just_disabled']
+            self.options['autobackup_hour'] = options_list['autobackup_hour']
+            self.options['write_preview_history'] = options_list['write_preview_history']
+            self.options['target_iter'] = options_list['target_iter']
+            self.options['random_flip'] = options_list['random_flip']
+            self.options['batch_size'] = self.batch_size = self.options['bs_per_gpu'] * self.options['num_gpu']
+            self.options['resolution'] = options_list['resolution']
+            self.options['face_type'] = options_list['face_type']
+            self.options['models_opt_on_gpu'] = options_list['models_opt_on_gpu']
+            self.options['archi'] = options_list['archi']
+            self.options['ae_dims'] = options_list['ae_dims']
+            self.options['e_dims'] = options_list['e_dims']
+            self.options['d_dims'] = options_list['d_dims']
+            self.options['d_mask_dims'] = options_list['d_mask_dims']
+            self.options['eyes_prio'] = options_list['eyes_prio']
+            self.options['lr_dropout'] = options_list['lr_dropout']
+            self.options['random_warp'] = options_list['random_warp']
+            self.options['gan_power'] = options_list['gan_power']
+            self.options['true_face_power'] = options_list['true_face_power']
+            self.options['face_style_power'] = options_list['face_style_power']
+            self.options['bg_style_power'] = options_list['bg_style_power']
+            self.options['ct_mode'] = options_list['ct_mode']
+            self.options['clipgrad'] = options_list['clipgrad']
+            self.options['pretrain'] = options_list['pretrain']
+
+            if self.options['use_syn']:
+                self.syn_warped_src = np.zeros((self.options['batch_size'], 3, self.options['resolution'], self.options['resolution']))
+                self.syn_target_src = np.zeros((self.options['batch_size'], 3, self.options['resolution'], self.options['resolution']))
+                self.syn_target_srcm_all = np.zeros((self.options['batch_size'], 1, self.options['resolution'], self.options['resolution']))
+                self.syn_warped_dst = np.zeros((self.options['batch_size'], 3, self.options['resolution'], self.options['resolution']))
+                self.syn_target_dst = np.zeros((self.options['batch_size'], 3, self.options['resolution'], self.options['resolution']))
+                self.syn_target_dstm_all = np.zeros((self.options['batch_size'], 1, self.options['resolution'], self.options['resolution']))
+
         else:
             lowest_vram = 2
             if len(device_config.devices) != 0:
@@ -656,7 +660,7 @@ class LambdaModel(ModelBase):
 
         bs = self.get_batch_size()
 
-        if USE_SYN and USE_BENCHMARK:
+        if self.options['use_syn'] and self.options['use_benchmark']:
             warped_src = self.syn_warped_src
             target_src = self.syn_target_src
             target_srcm_all = self.syn_target_srcm_all

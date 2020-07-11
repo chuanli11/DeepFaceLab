@@ -26,6 +26,7 @@ def trainerThread (s2c, c2s, e,
                     silent_start=False,
                     execute_programs = None,
                     debug=False,
+                    config_file=None,
                     **kwargs):
     while True:
         try:
@@ -55,6 +56,7 @@ def trainerThread (s2c, c2s, e,
                         cpu_only=cpu_only,
                         silent_start=silent_start,
                         debug=debug,
+                        config_file=config_file
                         )
 
             is_reached_goal = model.is_reached_iter_goal()
@@ -153,9 +155,10 @@ def trainerThread (s2c, c2s, e,
                             model_save()
 
                         if model.get_target_iter() != 0 and model.is_reached_iter_goal():
-                            io.log_info ('Reached target iteration.')
+                            io.log_info ('\nReached target iteration.')
                             model_save()
                             is_reached_goal = True
+                            break
                             io.log_info ('You can use preview now.')
 
                 if not is_reached_goal and (time.time() - last_save_time) >= save_interval_min*60:

@@ -42,16 +42,26 @@ python main.py extract --detector=s3fd --input-dir=data/fauci/output --output-di
 Step three: train
 
 ```
+GPU_IDXS=0,1
+
 rm -rf output && \
 python main.py train \
 --training-data-src-dir=~/data/dfl/Gordon_face \
 --training-data-dst-dir=~/data/dfl/Snowden_face \
 --model-dir output \
 --model Lambda \
---force-gpu-idxs 0 \
+--force-gpu-idxs $GPU_IDXS \
 --no-preview \
 --force-model-name lambda-gordon-snowden
 ```
+
+### Benchmark
+
+Use `benchmark/config/your_config_name.yaml` to set the model. Use `benchmark.sh` to run test.
+
+- `GPU_TYPE`:GPU type. For example, `TitanRTX`, `QuadroRTX8000`, `V100` etc.
+- `CONFIG_NAME`: Configuration name. Naming convention: `model_resolution_ae-dim_e-dim_d-dim`. For example, `liae_128_128_64_64`.
+- `GPU_IDXS`: GPU indices. For example `0`, `0,1`.
 
 
 ### Misc
