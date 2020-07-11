@@ -16,7 +16,7 @@ from samplelib import *
 
 
 
-class LambdaModel(ModelBase):
+class LambdaSAEHDModel(ModelBase):
 
     #override
     def on_initialize_options(self):
@@ -721,7 +721,7 @@ class LambdaModel(ModelBase):
             for i in range(n_samples):
                 ar = S[i], SS[i], D[i], DD[i], SD[i]
                 st.append ( np.concatenate ( ar, axis=1) )
-            result += [ ('Lambda', np.concatenate (st, axis=0 )), ]
+            result += [ ('LambdaSAEHD', np.concatenate (st, axis=0 )), ]
 
 
             st_m = []
@@ -731,7 +731,7 @@ class LambdaModel(ModelBase):
                 ar = S[i]*target_srcm[i], SS[i], D[i]*target_dstm[i], DD[i]*DDM[i], SD[i]*SD_mask
                 st_m.append ( np.concatenate ( ar, axis=1) )
 
-            result += [ ('Lambda masked', np.concatenate (st_m, axis=0 )), ]
+            result += [ ('LambdaSAEHD masked', np.concatenate (st_m, axis=0 )), ]
         else:
             result = []
 
@@ -739,39 +739,39 @@ class LambdaModel(ModelBase):
             for i in range(n_samples):
                 ar = S[i], SS[i]
                 st.append ( np.concatenate ( ar, axis=1) )
-            result += [ ('Lambda src-src', np.concatenate (st, axis=0 )), ]
+            result += [ ('LambdaSAEHD src-src', np.concatenate (st, axis=0 )), ]
 
             st = []
             for i in range(n_samples):
                 ar = D[i], DD[i]
                 st.append ( np.concatenate ( ar, axis=1) )
-            result += [ ('Lambda dst-dst', np.concatenate (st, axis=0 )), ]
+            result += [ ('LambdaSAEHD dst-dst', np.concatenate (st, axis=0 )), ]
 
             st = []
             for i in range(n_samples):
                 ar = D[i], SD[i]
                 st.append ( np.concatenate ( ar, axis=1) )
-            result += [ ('Lambda pred', np.concatenate (st, axis=0 )), ]
+            result += [ ('LambdaSAEHD pred', np.concatenate (st, axis=0 )), ]
 
 
             st_m = []
             for i in range(n_samples):
                 ar = S[i]*target_srcm[i], SS[i]
                 st_m.append ( np.concatenate ( ar, axis=1) )
-            result += [ ('Lambda masked src-src', np.concatenate (st_m, axis=0 )), ]
+            result += [ ('LambdaSAEHD masked src-src', np.concatenate (st_m, axis=0 )), ]
 
             st_m = []
             for i in range(n_samples):
                 ar = D[i]*target_dstm[i], DD[i]*DDM[i]
                 st_m.append ( np.concatenate ( ar, axis=1) )
-            result += [ ('Lambda masked dst-dst', np.concatenate (st_m, axis=0 )), ]
+            result += [ ('LambdaSAEHD masked dst-dst', np.concatenate (st_m, axis=0 )), ]
 
             st_m = []
             for i in range(n_samples):
                 SD_mask = DDM[i]*SDM[i] if self.face_type < FaceType.HEAD else SDM[i]
                 ar = D[i]*target_dstm[i], SD[i]*SD_mask
                 st_m.append ( np.concatenate ( ar, axis=1) )
-            result += [ ('Lambda masked pred', np.concatenate (st_m, axis=0 )), ]
+            result += [ ('LambdaSAEHD masked pred', np.concatenate (st_m, axis=0 )), ]
 
         return result
 
@@ -787,4 +787,4 @@ class LambdaModel(ModelBase):
         import merger
         return self.predictor_func, (self.options['resolution'], self.options['resolution'], 3), merger.MergerConfigMasked(face_type=self.face_type, default_mode = 'overlay')
 
-Model = LambdaModel
+Model = LambdaSAEHDModel

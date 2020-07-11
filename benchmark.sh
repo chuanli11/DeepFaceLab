@@ -5,7 +5,7 @@ GPU_IDXS=0,1
 
 TRAINING_DATA_SRC_DIR=~/data/dfl/Gordon_face
 TRAINING_DATA_DST_DIR=~/data/dfl/Snowden_face
-MODEL=Lambda
+MODEL=LambdaSAEHD
 MODEL_NAME=lambda-gordon-snowden
 
 GPUS=(${GPU_IDXS//,/ })

@@ -8,6 +8,7 @@ cd DeepFaceLab && \
 virtualenv -p /usr/bin/python3.6 venv && \
 . venv/bin/activate && \
 pip install -r requirements-cuda.txt
+pip install pandas
 ```
 
 ### Get the best test data
@@ -63,6 +64,8 @@ Use `benchmark/config/your_config_name.yaml` to set the model. Use `benchmark.sh
 - `CONFIG_NAME`: Configuration name. Naming convention: `model_resolution_ae-dim_e-dim_d-dim`. For example, `liae_128_128_64_64`.
 - `GPU_IDXS`: GPU indices. For example `0`, `0,1`.
 
+
+Use `gather_benchmark.py` to create `csv` file.
 
 ### Misc
 
