@@ -11,4 +11,4 @@
 !models/*
 models/Model_Lambda/__pycache__/*
 !benchmark/
-!benchmark/*
+!benchmark/**
