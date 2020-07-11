@@ -8,7 +8,6 @@ cd DeepFaceLab && \
 virtualenv -p /usr/bin/python3.6 venv && \
 . venv/bin/activate && \
 pip install -r requirements-cuda.txt
-pip install pandas
 ```
 
 ### Get the best test data
