@@ -8,6 +8,8 @@ GPU_NAME="$(nvidia-smi -i 0 --query-gpu=gpu_name --format=csv,noheader | sed 's/
 
 . ${SETTING}".sh"
 
+mkdir -p benchmark/log
+
 for idx in $GPU_IDXS; do
     for config in $CONFIGS; do
         MODEL=(${config//_/ })
