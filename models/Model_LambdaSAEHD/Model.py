@@ -35,7 +35,7 @@ class LambdaSAEHDModel(ModelBase):
             self.pretrain_just_disabled = options_list['pretrain_just_disabled']
             self.options['autobackup_hour'] = options_list['autobackup_hour']
             self.options['write_preview_history'] = options_list['write_preview_history']
-            self.options['target_iter'] = options_list['target_iter']
+            self.options['target_iter'] = int(self.target_iter)
             self.options['random_flip'] = options_list['random_flip']
             self.options['batch_size'] = self.batch_size = self.options['bs_per_gpu'] * self.options['num_gpu']
             self.options['resolution'] = options_list['resolution']

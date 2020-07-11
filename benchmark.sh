@@ -1,7 +1,8 @@
 #!/bin/bash
 SETTING=${1:-benchmark/config/config_all}
-TRAINING_DATA_SRC_DIR=${2:-~/data/dfl/Gordon_face}
-TRAINING_DATA_DST_DIR=${3:-~/data/dfl/Snowden_face}
+TARGET_ITER=${2:-50}
+TRAINING_DATA_SRC_DIR=${3:-~/data/dfl/Gordon_face}
+TRAINING_DATA_DST_DIR=${4:-~/data/dfl/Snowden_face}
 
 GPU_NAME="$(nvidia-smi -i 0 --query-gpu=gpu_name --format=csv,noheader | sed 's/ //g' 2>/dev/null || echo PLACEHOLDER )"
 
@@ -24,6 +25,7 @@ for idx in $GPU_IDXS; do
         --force-gpu-idxs $idx \
         --no-preview \
         --force-model-name $MODEL_NAME \
-        --config-file benchmark/config/${config}.yaml  2>&1 | tee $LOG_NAME
+        --config-file benchmark/config/${config}.yaml \
+        --target-iter $TARGET_ITER  2>&1 | tee $LOG_NAME
     done
 done

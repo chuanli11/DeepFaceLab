@@ -27,6 +27,7 @@ def trainerThread (s2c, c2s, e,
                     execute_programs = None,
                     debug=False,
                     config_file=None,
+                    target_iter=None,
                     **kwargs):
     while True:
         try:
@@ -56,7 +57,8 @@ def trainerThread (s2c, c2s, e,
                         cpu_only=cpu_only,
                         silent_start=silent_start,
                         debug=debug,
-                        config_file=config_file
+                        config_file=config_file,
+                        target_iter=target_iter
                         )
 
             is_reached_goal = model.is_reached_iter_goal()
