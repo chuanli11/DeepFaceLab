@@ -1,7 +1,7 @@
 if __name__ == "__main__":
     # Fix for linux
     import multiprocessing
-    multiprocessing.set_start_method("fork")
+    multiprocessing.set_start_method("spawn")
 
     from core.leras import nn
     nn.initialize_main_env()
