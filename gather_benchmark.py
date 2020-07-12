@@ -9,10 +9,9 @@ list_gpu_type = ['TeslaV100-SXM3-32GB']
 list_config = [
 'LambdaSAEHD_liae_128_128_64_64', 'LambdaSAEHD_liae_128_128_64_64_syn', 'LambdaSAEHD_liae_256_128_64_64', 'LambdaSAEHD_liae_256_128_64_64_syn', \
 'LambdaSAEHD_liae_gan_128_128_64_64', 'LambdaSAEHD_liae_gan_128_128_64_64_syn', 'LambdaSAEHD_liae_gan_256_128_64_64', 'LambdaSAEHD_liae_gan_256_128_64_64_syn', \
-'LambdaSAEHD_liae_128_256_128_128', 'LambdaSAEHD_liae_128_256_128_128_syn' \
-'LambdaSAEHD_liae_fp_128_128_64_64', 'LambdaSAEHD_liae_fp_128_128_64_64_syn' \
-'LambdaSAEHD_liae_fs_128_128_64_64', 'LambdaSAEHD_liae_fs_128_128_64_64_syn' \
-'LambdaSAEHD_liae_bs_128_128_64_64', 'LambdaSAEHD_liae_bs_128_128_64_64_syn'
+'LambdaSAEHD_liae_128_256_128_128', 'LambdaSAEHD_liae_128_256_128_128_syn', \
+'LambdaSAEHD_liae_fs_128_128_64_64', 'LambdaSAEHD_liae_fs_128_128_64_64_syn', \
+'LambdaSAEHD_liae_bs_128_128_64_64', 'LambdaSAEHD_liae_bs_128_128_64_64_syn', \
 ]
 
 list_gpu_idxs = ['0', '0,1', '0,1,2,3', '0,1,2,3,4,5,6,7', '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15']
@@ -33,7 +32,7 @@ def get_time(t_start, t_end):
 
 def get_throughput(gpu_type, config, num_gpu):
     log_file = path_config + '/' + config + '_' + str(num_gpu) + 'x' + gpu_type + '.txt'
-    
+    print(log_file)    
     count = 0
     time_second_iter = ''
     time_end = ''
