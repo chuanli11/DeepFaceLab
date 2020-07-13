@@ -339,6 +339,13 @@ class ModelBase(object):
         return ( ('loss_src', 0), ('loss_dst', 0) )
 
     #overridable
+    def onDataOneIter(self, sample, generator_list):
+        #train your models here
+
+        #return array of losses
+        return ( ('loss_src', 0), ('loss_dst', 0) )
+
+    #overridable
     def onGetPreview(self, sample):
         #you can return multiple previews
         #return [ ('preview_name',preview_rgb), ... ]
@@ -487,6 +494,20 @@ class ModelBase(object):
         self.iter += 1
 
         return self.iter, iter_time
+
+
+    def data_one_iter(self):
+
+        iter_time = time.time()
+        losses = self.onDataOneIter()
+        iter_time = time.time() - iter_time
+
+        self.loss_history.append ( [float(loss[1]) for loss in losses] )
+
+        self.iter += 1
+
+        return self.iter, iter_time
+
 
     def pass_one_iter(self):
         self.generate_next_samples()

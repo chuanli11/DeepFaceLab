@@ -703,6 +703,27 @@ class LambdaSAEHDModel(ModelBase):
 
         return ( ('src_loss', np.mean(src_loss) ), ('dst_loss', np.mean(dst_loss) ), )
 
+
+    def onDataOneIter(self):
+        if self.get_iter() == 0 and not self.pretrain and not self.pretrain_just_disabled:
+            io.log_info('You are training the model from scratch. It is strongly recommended to use a pretrained model to speed up the training and improve the quality.\n')
+
+        bs = self.get_batch_size()
+
+        if self.options['use_syn'] and self.options['use_benchmark']:
+            warped_src = self.syn_warped_src
+            target_src = self.syn_target_src
+            target_srcm_all = self.syn_target_srcm_all
+            warped_dst = self.syn_warped_dst
+            target_dst = self.syn_target_dst
+            target_dstm_all = self.syn_target_dstm_all         
+        else:
+            ( (warped_src, target_src, target_srcm_all), \
+              (warped_dst, target_dst, target_dstm_all) ) = self.generate_next_samples()
+
+        return ( ('loss_src', 0), ('loss_dst', 0) )
+
+
     #override
     def onGetPreview(self, samples):
         ( (warped_src, target_src, target_srcm_all,),
