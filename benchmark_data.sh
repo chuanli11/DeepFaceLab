@@ -1,8 +1,8 @@
 #!/bin/bash
 SETTING=${1:-benchmark/config/config_data}
-TARGET_ITER=${2:-50}
-TRAINING_DATA_SRC_DIR=${3:-~/data/dfl/Gordon_face}
-TRAINING_DATA_DST_DIR=${4:-~/data/dfl/Snowden_face}
+TARGET_ITER=${2:-100}
+TRAINING_DATA_SRC_DIR=${3:-/tmp/ubuntu/data/dfl/Gordon_face}
+TRAINING_DATA_DST_DIR=${4:-/tmp/ubuntu/data/dfl/Snowden_face}
 
 GPU_NAME="$(nvidia-smi -i 0 --query-gpu=gpu_name --format=csv,noheader | sed 's/ //g' 2>/dev/null || echo PLACEHOLDER )"
 
