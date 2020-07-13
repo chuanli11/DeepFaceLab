@@ -21,15 +21,17 @@ class LambdaSAEHDModel(ModelBase):
     #override
     def on_initialize_options(self):
         device_config = nn.getCurrentDeviceConfig()
-        with open(self.config_file) as file:
-            options_list = yaml.load(file, Loader=yaml.FullLoader)
 
-        self.options['use_syn'] = options_list['use_syn']
-        self.options['use_benchmark'] = options_list['use_benchmark']
-        self.options['bs_per_gpu'] = options_list['bs_per_gpu']
-        self.options['num_gpu'] = len(device_config.devices)
+        if not self.config_file is None:                    
+            with open(self.config_file) as file:
+                options_list = yaml.load(file, Loader=yaml.FullLoader)
 
-        if self.options['use_benchmark']:            
+            self.options['use_syn'] = options_list['use_syn']
+            self.options['use_benchmark'] = options_list['use_benchmark']
+            self.options['bs_per_gpu'] = options_list['bs_per_gpu']
+            self.options['num_gpu'] = len(device_config.devices)
+
+
             self.options['masked_training'] = options_list['masked_training']
             self.options['uniform_yaw'] = options_list['uniform_yaw']
             self.pretrain_just_disabled = options_list['pretrain_just_disabled']
@@ -66,6 +68,8 @@ class LambdaSAEHDModel(ModelBase):
                 self.syn_target_dstm_all = np.zeros((self.options['batch_size'], 1, self.options['resolution'], self.options['resolution']))
 
         else:
+            self.options['use_syn'] = False
+            self.options['use_benchmark'] = False
             lowest_vram = 2
             if len(device_config.devices) != 0:
                 lowest_vram = device_config.devices.get_worst_device().total_mem_gb
