@@ -12,3 +12,6 @@
 models/Model_Lambda/__pycache__/*
 !benchmark/
 !benchmark/**
+!mainscripts/
+!mainscripts/**
+mainscripts/__pycache__/*
