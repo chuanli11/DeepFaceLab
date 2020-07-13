@@ -9,6 +9,7 @@ list_gpu_type = ['TeslaV100-SXM3-32GB']
 list_config = [
 'LambdaSAEHD_liae_128_128_64_64', 'LambdaSAEHD_liae_128_128_64_64_syn', 'LambdaSAEHD_liae_256_128_64_64', 'LambdaSAEHD_liae_256_128_64_64_syn', \
 'LambdaSAEHD_liae_gan_128_128_64_64', 'LambdaSAEHD_liae_gan_128_128_64_64_syn', 'LambdaSAEHD_liae_gan_256_128_64_64', 'LambdaSAEHD_liae_gan_256_128_64_64_syn', \
+'LambdaSAEHD_liae_512_128_64_64', 'LambdaSAEHD_liae_512_128_64_64_syn', \
 'LambdaSAEHD_liae_128_256_128_128', 'LambdaSAEHD_liae_128_256_128_128_syn', \
 'LambdaSAEHD_liae_fs_128_128_64_64', 'LambdaSAEHD_liae_fs_128_128_64_64_syn', \
 'LambdaSAEHD_liae_bs_128_128_64_64', 'LambdaSAEHD_liae_bs_128_128_64_64_syn', \
