@@ -1,0 +1,4 @@
+Running trainer.
+
+
+Model first run.
