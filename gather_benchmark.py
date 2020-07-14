@@ -3,13 +3,13 @@ import pandas as pd
 
 list_gpu_type = ['TeslaV100-SXM3-32GB']
 
-path_config = 'benchmark/log_data'
-output_file = 'benchmark/benchmark_data.csv'
-list_config = [
-'LambdaSAEHD_liae_128_128_64_64', 'LambdaSAEHD_liae_256_128_64_64', 'LambdaSAEHD_liae_512_128_64_64', \
-'LambdaSAEHD_liae_128_128_64_64_syn', 'LambdaSAEHD_liae_256_128_64_64_syn', 'LambdaSAEHD_liae_512_128_64_64_syn', \
-]
-list_gpu_idxs = ['0', '0,1', '0,1,2,3', '0,1,2,3,4,5,6,7', '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15']
+#path_config = 'benchmark/log_data'
+#output_file = 'benchmark/benchmark_data.csv'
+#list_config = [
+#'LambdaSAEHD_liae_128_128_64_64', 'LambdaSAEHD_liae_256_128_64_64', 'LambdaSAEHD_liae_512_128_64_64', \
+#'LambdaSAEHD_liae_128_128_64_64_syn', 'LambdaSAEHD_liae_256_128_64_64_syn', 'LambdaSAEHD_liae_512_128_64_64_syn', \
+#]
+#list_gpu_idxs = ['0', '0,1', '0,1,2,3', '0,1,2,3,4,5,6,7', '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15']
 
 #path_config = 'benchmark/log'
 #output_file = 'benchmark/benchmark.csv'
@@ -22,6 +22,14 @@ list_gpu_idxs = ['0', '0,1', '0,1,2,3', '0,1,2,3,4,5,6,7', '0,1,2,3,4,5,6,7,8,9,
 #'LambdaSAEHD_liae_bs_128_128_64_64', 'LambdaSAEHD_liae_bs_128_128_64_64_syn', \
 #]
 #list_gpu_idxs = ['0', '0,1', '0,1,2,3', '0,1,2,3,4,5,6,7', '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15']
+
+path_config = 'benchmark/log'
+output_file = 'benchmark/benchmark_th.csv'
+list_config = [
+'LambdaSAEHD_th_liae_ud_trump_512_256_256_160', 'LambdaSAEHD_th_liae_ud_trump_512_512_128_128', 'LambdaSAEHD_th_liae_ud_3_416_288_168_120', \
+]
+list_gpu_idxs = ['0', '0,1', '0,1,2,3', '0,1,2,3,4,5,6,7']
+
 
 pattern = "]["
 
@@ -39,6 +47,8 @@ def get_time(t_start, t_end):
 
 def get_throughput(gpu_type, config, num_gpu):
     log_file = path_config + '/' + config + '_' + str(num_gpu) + 'x' + gpu_type + '.txt'
+    if not os.path.isfile(log_file):
+        return 0.0
     print(log_file)    
     count = 0
     time_second_iter = ''
