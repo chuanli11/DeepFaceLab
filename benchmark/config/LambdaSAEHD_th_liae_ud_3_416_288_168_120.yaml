@@ -1,7 +1,6 @@
 use_syn: False
 use_benchmark: True
 resolution: 416
-bs_per_gpu: 8 # OOM for 16xGPUs
 masked_training: True
 uniform_yaw: True
 pretrain_just_disabled: True

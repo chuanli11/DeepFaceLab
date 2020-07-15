@@ -129,6 +129,8 @@ if __name__ == "__main__":
                   'debug'                    : arguments.debug,
                   'config_file'              : arguments.config_file,
                   'target_iter'              : arguments.target_iter,
+                  'precision'                : arguments.precision,
+                  'bs_per_gpu'               : arguments.bs_per_gpu,
                   }
         from mainscripts import Trainer
         Trainer.main(**kwargs)
@@ -148,6 +150,8 @@ if __name__ == "__main__":
     p.add_argument('--silent-start', action="store_true", dest="silent_start", default=False, help="Silent start. Automatically chooses Best GPU and last used model.")
     p.add_argument('--config-file', dest="config_file", default=None, help="Path of a config file that defines model details.")
     p.add_argument('--target-iter', dest="target_iter", default=50, help="Number of training iterations.")
+    p.add_argument('--precision', dest="precision", default='float32', help="Precision for training")
+    p.add_argument('--bs-per-gpu', dest="bs_per_gpu", default=1, help="Batch size per GPU")
     p.add_argument('--execute-program', dest="execute_program", default=[], action='append', nargs='+')
     p.set_defaults (func=process_train)
 
@@ -170,7 +174,7 @@ if __name__ == "__main__":
                   'execute_programs'         : [ [int(x[0]), x[1] ] for x in arguments.execute_program ],
                   'debug'                    : arguments.debug,
                   'config_file'              : arguments.config_file,
-                  'target_iter'              : arguments.target_iter,
+                  'target_iter'              : arguments.target_iter
                   }
         from mainscripts import Data
         Data.main(**kwargs)
@@ -190,6 +194,7 @@ if __name__ == "__main__":
     p.add_argument('--silent-start', action="store_true", dest="silent_start", default=False, help="Silent start. Automatically chooses Best GPU and last used model.")
     p.add_argument('--config-file', dest="config_file", default=None, help="Path of a config file that defines model details.")
     p.add_argument('--target-iter', dest="target_iter", default=50, help="Number of training iterations.")
+    p.add_argument('--bs-per-gpu', dest="bs_per_gpu", default=1, help="Batch size per GPU.")
     p.add_argument('--execute-program', dest="execute_program", default=[], action='append', nargs='+')
     p.set_defaults (func=process_data)
 

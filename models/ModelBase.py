@@ -36,6 +36,8 @@ class ModelBase(object):
                        silent_start=False,
                        config_file=None,
                        target_iter=None,
+                       precision=None,
+                       bs_per_gpu=None,
                        **kwargs):
         self.is_training = is_training
         self.saved_models_path = saved_models_path
@@ -47,7 +49,9 @@ class ModelBase(object):
         self.debug = debug
         self.config_file=config_file
         self.target_iter=target_iter
-        
+        self.precision=precision
+        self.bs_per_gpu=bs_per_gpu
+
         self.model_class_name = model_class_name = Path(inspect.getmodule(self).__file__).parent.name.rsplit("_", 1)[1]
 
         if force_model_class_name is None:
@@ -163,7 +167,6 @@ class ModelBase(object):
                                 if not cpu_only else nn.DeviceConfig.CPU()
         
         nn.initialize(self.device_config)
-
         ####
         self.default_options_path = saved_models_path / f'{self.model_class_name}_default_options.dat'
         self.default_options = {}

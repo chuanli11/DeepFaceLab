@@ -229,7 +229,11 @@ def gaussian_blur(input, radius=2.0):
     else:
         padding = None
     gauss_kernel = gauss_kernel[:,:,None,None]
-
+    if nn.floatx == 'float16':
+        kernel_type = np.float16
+    elif nn.floatx == 'float32':
+        kernel_type = np.float32
+    gauss_kernel = gauss_kernel.astype(kernel_type)
     x = input
     k = tf.tile (gauss_kernel, (1,1,x.shape[nn.conv2d_ch_axis],1) )
     x = tf.pad(x, padding )

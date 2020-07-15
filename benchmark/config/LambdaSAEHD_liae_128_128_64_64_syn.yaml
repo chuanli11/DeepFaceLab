@@ -1,7 +1,6 @@
 use_syn: True
 use_benchmark: True
 resolution: 128
-bs_per_gpu: 32
 masked_training: True
 uniform_yaw: False
 pretrain_just_disabled: True

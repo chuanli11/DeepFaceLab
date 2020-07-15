@@ -1,15 +1,16 @@
 import os
+import glob
 import pandas as pd
 
-list_gpu_type = ['TeslaV100-SXM3-32GB']
 
-#path_config = 'benchmark/log_data'
-#output_file = 'benchmark/benchmark_data.csv'
-#list_config = [
-#'LambdaSAEHD_liae_128_128_64_64', 'LambdaSAEHD_liae_256_128_64_64', 'LambdaSAEHD_liae_512_128_64_64', \
-#'LambdaSAEHD_liae_128_128_64_64_syn', 'LambdaSAEHD_liae_256_128_64_64_syn', 'LambdaSAEHD_liae_512_128_64_64_syn', \
-#]
-#list_gpu_idxs = ['0', '0,1', '0,1,2,3', '0,1,2,3,4,5,6,7', '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15']
+# list_gpu_type = ['TeslaV100-SXM3-32GB']
+# path_config = 'benchmark/log_data'
+# output_file = 'benchmark/benchmark_data.csv'
+# list_config = [
+# 'LambdaSAEHD_liae_128_128_64_64', 'LambdaSAEHD_liae_256_128_64_64', 'LambdaSAEHD_liae_512_128_64_64', \
+# 'LambdaSAEHD_liae_128_128_64_64_syn', 'LambdaSAEHD_liae_256_128_64_64_syn', 'LambdaSAEHD_liae_512_128_64_64_syn', \
+# ]
+# list_gpu_idxs = ['0', '0,1', '0,1,2,3', '0,1,2,3,4,5,6,7', '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15']
 
 #path_config = 'benchmark/log'
 #output_file = 'benchmark/benchmark.csv'
@@ -23,12 +24,13 @@ list_gpu_type = ['TeslaV100-SXM3-32GB']
 #]
 #list_gpu_idxs = ['0', '0,1', '0,1,2,3', '0,1,2,3,4,5,6,7', '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15']
 
+list_gpu_type = ['QuadroRTX8000']
 path_config = 'benchmark/log'
-output_file = 'benchmark/benchmark_th.csv'
+output_file = 'benchmark/benchmark_fp32_vs_fp16.csv'
 list_config = [
-'LambdaSAEHD_th_liae_ud_trump_512_256_256_160', 'LambdaSAEHD_th_liae_ud_trump_512_512_128_128', 'LambdaSAEHD_th_liae_ud_3_416_288_168_120', \
+'LambdaSAEHD_liae_128_128_64_64', 'LambdaSAEHD_liae_gan_128_128_64_64', \
 ]
-list_gpu_idxs = ['0', '0,1', '0,1,2,3', '0,1,2,3,4,5,6,7']
+list_gpu_idxs = ['0', '0,1']
 
 
 pattern = "]["
@@ -45,15 +47,14 @@ def get_time(t_start, t_end):
     return sec_e - sec_s 
 
 
-def get_throughput(gpu_type, config, num_gpu):
-    log_file = path_config + '/' + config + '_' + str(num_gpu) + 'x' + gpu_type + '.txt'
-    if not os.path.isfile(log_file):
+def get_throughput(log_file_name):
+
+    if not os.path.isfile(log_file_name):
         return 0.0
-    print(log_file)    
     count = 0
     time_second_iter = ''
     time_end = ''
-    for i, line in enumerate(open(os.path.join(log_file))):
+    for i, line in enumerate(open(os.path.join(log_file_name))):
         if 'batch_size' in line:
             bs = line.split(' ')[13]
         if pattern in line:
@@ -68,17 +69,33 @@ def get_throughput(gpu_type, config, num_gpu):
 list_row = []
 for gpu_type in list_gpu_type:
     for gpu_idx in list_gpu_idxs:
-        num_gpu = len(gpu_idx.split(','))
-        list_row.append(str(num_gpu) + "x" + gpu_type)
+        for config in list_config:
+            num_gpu = len(gpu_idx.split(','))
+            log_file = path_config + '/' + config + '_' + str(num_gpu) + 'x' + gpu_type + '*.txt'
+            for log_file_name in glob.glob(log_file):
+                items = os.path.basename(log_file_name).split('.')[0].split('_')
+                if items[-1] == 'fp16':
+                    name = "_".join(items[-3:])
+                else:
+                    name = "_".join(items[-2:])
+                if not name in list_row:
+                    list_row.append(name)
+                    print(name)
 
 df_throughput = pd.DataFrame(index=list_row, columns=list_config)
-
 
 for gpu_type in list_gpu_type:
     for gpu_idx in list_gpu_idxs:
         for config in list_config:
             num_gpu = len(gpu_idx.split(','))
-            throughput = get_throughput(gpu_type, config, num_gpu)
-            df_throughput.at[str(num_gpu) + "x" + gpu_type, config] = throughput
+            log_file = path_config + '/' + config + '_' + str(num_gpu) + 'x' + gpu_type + '*.txt'
+            for log_file_name in glob.glob(log_file):
+                items = os.path.basename(log_file_name).split('.')[0].split('_')
+                if items[-1] == 'fp16':
+                    name = "_".join(items[-3:])
+                else:
+                    name = "_".join(items[-2:])
+                throughput = get_throughput(log_file_name)
+                df_throughput.at[name, config] = throughput
 
 df_throughput.to_csv(output_file)

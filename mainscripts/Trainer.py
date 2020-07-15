@@ -28,6 +28,8 @@ def trainerThread (s2c, c2s, e,
                     debug=False,
                     config_file=None,
                     target_iter=None,
+                    precision=None,
+                    bs_per_gpu=None,
                     **kwargs):
     while True:
         try:
@@ -58,7 +60,9 @@ def trainerThread (s2c, c2s, e,
                         silent_start=silent_start,
                         debug=debug,
                         config_file=config_file,
-                        target_iter=target_iter
+                        target_iter=target_iter,
+                        precision=precision,
+                        bs_per_gpu=bs_per_gpu
                         )
 
             is_reached_goal = model.is_reached_iter_goal()

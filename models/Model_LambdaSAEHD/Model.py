@@ -28,9 +28,9 @@ class LambdaSAEHDModel(ModelBase):
 
             self.options['use_syn'] = options_list['use_syn']
             self.options['use_benchmark'] = options_list['use_benchmark']
-            self.options['bs_per_gpu'] = options_list['bs_per_gpu']
             self.options['num_gpu'] = len(device_config.devices)
-
+            self.options['precision'] = self.precision
+            self.options['bs_per_gpu'] = int(self.bs_per_gpu)
 
             self.options['masked_training'] = options_list['masked_training']
             self.options['uniform_yaw'] = options_list['uniform_yaw']
@@ -70,6 +70,8 @@ class LambdaSAEHDModel(ModelBase):
         else:
             self.options['use_syn'] = False
             self.options['use_benchmark'] = False
+            self.options['precision'] = 'float32'
+
             lowest_vram = 2
             if len(device_config.devices) != 0:
                 lowest_vram = device_config.devices.get_worst_device().total_mem_gb
@@ -217,7 +219,7 @@ class LambdaSAEHDModel(ModelBase):
         device_config = nn.getCurrentDeviceConfig()
         devices = device_config.devices
         self.model_data_format = "NCHW" if len(devices) != 0 and not self.is_debug() else "NHWC"
-        nn.initialize(data_format=self.model_data_format)
+        nn.initialize(floatx=self.options['precision'], data_format=self.model_data_format)
         tf = nn.tf
 
         self.resolution = resolution = self.options['resolution']
