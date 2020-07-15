@@ -501,6 +501,9 @@ class LambdaSAEHDModel(ModelBase):
                         gpu_D_code_loss_gvs += [ nn.gradients (gpu_D_code_loss, self.code_discriminator.get_weights() ) ]
 
                     if gan_power != 0:
+                        if nn.floatx == 'float16':
+                            gpu_pred_src_src_masked_opt = tf.cast(gpu_pred_src_src_masked_opt, tf.float16)
+                            gpu_target_src_masked_opt = tf.cast(gpu_target_src_masked_opt, tf.float16)
                         gpu_pred_src_src_d       = self.D_src(gpu_pred_src_src_masked_opt)
                         gpu_pred_src_src_d_ones  = tf.ones_like (gpu_pred_src_src_d)
                         gpu_pred_src_src_d_zeros = tf.zeros_like(gpu_pred_src_src_d)
@@ -520,8 +523,12 @@ class LambdaSAEHDModel(ModelBase):
 
                         gpu_D_src_dst_loss_gvs += [ nn.gradients (gpu_D_src_dst_loss, self.D_src.get_weights()+self.D_src_x2.get_weights() ) ]
 
-                        gpu_G_loss += 0.5*gan_power*( DLoss(gpu_pred_src_src_d_ones, gpu_pred_src_src_d) + DLoss(gpu_pred_src_src_x2_d_ones, gpu_pred_src_src_x2_d))
+                        gan_G_loss = 0.5*gan_power*( DLoss(gpu_pred_src_src_d_ones, gpu_pred_src_src_d) + DLoss(gpu_pred_src_src_x2_d_ones, gpu_pred_src_src_x2_d))
 
+                        if nn.floatx == 'float16':
+                            gan_G_loss = tf.cast(gan_G_loss, tf.float32)
+
+                        gpu_G_loss += gan_G_loss
 
                     gpu_G_loss_gvs += [ nn.gradients ( gpu_G_loss, self.src_dst_trainable_weights ) ]
 
