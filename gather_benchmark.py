@@ -25,7 +25,7 @@ import pandas as pd
 #list_gpu_idxs = ['0', '0,1', '0,1,2,3', '0,1,2,3,4,5,6,7', '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15']
 
 list_gpu_type = ['QuadroRTX8000']
-path_config = 'benchmark/log'
+path_config = 'benchmark/log_20200715'
 output_file = 'benchmark/benchmark_fp32_vs_fp16.csv'
 list_config = [
 'LambdaSAEHD_liae_128_128_64_64', 'LambdaSAEHD_liae_gan_128_128_64_64', \
@@ -74,10 +74,7 @@ for gpu_type in list_gpu_type:
             log_file = path_config + '/' + config + '_' + str(num_gpu) + 'x' + gpu_type + '*.txt'
             for log_file_name in glob.glob(log_file):
                 items = os.path.basename(log_file_name).split('.')[0].split('_')
-                if items[-1] == 'fp16':
-                    name = "_".join(items[-3:])
-                else:
-                    name = "_".join(items[-2:])
+                name = "_".join(items[-3:])
                 if not name in list_row:
                     list_row.append(name)
                     print(name)
@@ -91,10 +88,7 @@ for gpu_type in list_gpu_type:
             log_file = path_config + '/' + config + '_' + str(num_gpu) + 'x' + gpu_type + '*.txt'
             for log_file_name in glob.glob(log_file):
                 items = os.path.basename(log_file_name).split('.')[0].split('_')
-                if items[-1] == 'fp16':
-                    name = "_".join(items[-3:])
-                else:
-                    name = "_".join(items[-2:])
+                name = "_".join(items[-3:])
                 throughput = get_throughput(log_file_name)
                 df_throughput.at[name, config] = throughput
 
