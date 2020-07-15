@@ -180,6 +180,12 @@ class DeepFakeArchi(nn.ArchiBase):
                                             tf.concat ( (  tf.zeros ( (1,1,1,1) ), tf.ones ( (1,1,1,1) ) ), axis=nn.conv2d_spatial_axes[1] ) ), axis=nn.conv2d_spatial_axes[0] )
                         z3 = tf.tile ( z3, tile_cfg )
 
+                        if nn.floatx == 'float16':
+                            x0 = tf.cast(x0, dtype=tf.float32)
+                            x1 = tf.cast(x1, dtype=tf.float32)
+                            x2 = tf.cast(x2, dtype=tf.float32)
+                            x3 = tf.cast(x3, dtype=tf.float32)
+
                         x = x0*z0 + x1*z1 + x2*z2 + x3*z3
                     else:
                         x = tf.nn.sigmoid(self.out_conv(x))

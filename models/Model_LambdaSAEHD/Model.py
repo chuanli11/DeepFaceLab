@@ -423,6 +423,12 @@ class LambdaSAEHDModel(ModelBase):
                     gpu_target_src_masked_opt  = gpu_target_src*gpu_target_srcm_blur if masked_training else gpu_target_src
                     gpu_target_dst_masked_opt  = gpu_target_dst_masked if masked_training else gpu_target_dst
 
+                    if nn.floatx == 'float16':
+                        gpu_target_srcm_blur = tf.cast(gpu_target_srcm_blur, tf.float32)
+                        gpu_target_dstm_blur = tf.cast(gpu_target_srcm_blur, tf.float32)
+                        gpu_target_src_masked_opt = tf.cast(gpu_target_src_masked_opt, tf.float32)
+
+
                     gpu_pred_src_src_masked_opt = gpu_pred_src_src*gpu_target_srcm_blur if masked_training else gpu_pred_src_src
                     gpu_pred_dst_dst_masked_opt = gpu_pred_dst_dst*gpu_target_dstm_blur if masked_training else gpu_pred_dst_dst
 
@@ -439,6 +445,9 @@ class LambdaSAEHDModel(ModelBase):
                     if eyes_prio:
                         gpu_src_loss += tf.reduce_mean ( 300*tf.abs ( gpu_target_src*gpu_target_srcm_eyes - gpu_pred_src_src*gpu_target_srcm_eyes ), axis=[1,2,3])
 
+                    if nn.floatx == 'float16':
+                        gpu_target_srcm = tf.cast(gpu_target_srcm, tf.float32)
+                        gpu_pred_src_srcm = tf.cast(gpu_pred_src_srcm, tf.float32)
                     gpu_src_loss += tf.reduce_mean ( 10*tf.square( gpu_target_srcm - gpu_pred_src_srcm ),axis=[1,2,3] )
 
                     face_style_power = self.options['face_style_power'] / 100.0
@@ -453,6 +462,9 @@ class LambdaSAEHDModel(ModelBase):
                     if resolution < 256:
                         gpu_dst_loss = tf.reduce_mean ( 10*nn.dssim(gpu_target_dst_masked_opt, gpu_pred_dst_dst_masked_opt, max_val=1.0, filter_size=int(resolution/11.6) ), axis=[1])
                     else:
+                        if nn.floatx == 'float16':
+                            gpu_target_dst_masked_opt = tf.cast(gpu_target_dst_masked_opt, tf.float32)
+                            gpu_pred_dst_dst_masked_opt = tf.cast(gpu_pred_dst_dst_masked_opt, tf.float32)
                         gpu_dst_loss = tf.reduce_mean ( 5*nn.dssim(gpu_target_dst_masked_opt, gpu_pred_dst_dst_masked_opt, max_val=1.0, filter_size=int(resolution/11.6) ), axis=[1])
                         gpu_dst_loss += tf.reduce_mean ( 5*nn.dssim(gpu_target_dst_masked_opt, gpu_pred_dst_dst_masked_opt, max_val=1.0, filter_size=int(resolution/23.2) ), axis=[1])
                     gpu_dst_loss += tf.reduce_mean ( 10*tf.square(  gpu_target_dst_masked_opt- gpu_pred_dst_dst_masked_opt ), axis=[1,2,3])
@@ -461,6 +473,9 @@ class LambdaSAEHDModel(ModelBase):
                     if eyes_prio:
                         gpu_dst_loss += tf.reduce_mean ( 300*tf.abs ( gpu_target_dst*gpu_target_dstm_eyes - gpu_pred_dst_dst*gpu_target_dstm_eyes ), axis=[1,2,3])
 
+                    if nn.floatx == 'float16':
+                        gpu_target_dstm = tf.cast(gpu_target_dstm, tf.float32)
+                        gpu_pred_dst_dstm = tf.cast(gpu_pred_dst_dstm, tf.float32)
                     gpu_dst_loss += tf.reduce_mean ( 10*tf.square( gpu_target_dstm - gpu_pred_dst_dstm ),axis=[1,2,3] )
 
                     gpu_src_losses += [gpu_src_loss]

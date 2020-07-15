@@ -87,7 +87,7 @@ Use `benchmark/config/your_config_name.yaml` to configure the model.
 Use `benchmark.sh` to run test.
 
 ```
-./benchmark.sh SETTING TARGET_ITER TRAINING_DATA_SRC_IDR TRAINING_DATA_DST_DIR PRECISION BS_PER_GPU
+./benchmark.sh SETTING TARGET_ITER TRAINING_DATA_SRC_IDR TRAINING_DATA_DST_DIR PRECISION BS_PER_GPU LOG_DIR
 ```
 
 - `SETTING`: Configuration file. For example, `benchmark/config/config_all`
@@ -96,6 +96,7 @@ Use `benchmark.sh` to run test.
 - `TRAINING_DATA_DST_DIR`: Path to dst data. 
 - `PRECISION`: Precision to train the model.
 - `BS_PER_GPU`: Batch per GPU.
+- `LOG_DIR`: Log directory
 
 
 Use `gather_benchmark.py` to create `csv` file.
