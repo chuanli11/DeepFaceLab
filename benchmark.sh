@@ -1,8 +1,8 @@
 #!/bin/bash
 SETTING=${1:-benchmark/config/config_all}
 TARGET_ITER=${2:-50}
-TRAINING_DATA_SRC_DIR=${3:-~/data/dfl/Gordon_face}
-TRAINING_DATA_DST_DIR=${4:-~/data/dfl/Snowden_face}
+TRAINING_DATA_SRC_DIR=${3:-~/_src/Dr_Fauci/WholeFace/_Custom_Batches/aligned}
+TRAINING_DATA_DST_DIR=${4:-~/_src/Trey_TrainingData/WholeFace/TreyEgg_WF}
 PRECISION=${5:-float32}
 BS_PER_GPU=${6:-1}
 LOG_DIR=${7:-log_20200715}
@@ -25,15 +25,14 @@ for idx in $GPU_IDXS; do
         else
             LOG_NAME=benchmark/${LOG_DIR}/${config}_${NUM_GPU}x${GPU_NAME}_bs${BS_PER_GPU}_fp32.txt
         fi        
-
-        rm -rf output && \
+        MODEL_DIR=output/$(echo "$LOG_NAME" | cut -f 1 -d '.')
+        rm -rf $MODEL_DIR && \
         python main.py train \
         --training-data-src-dir=$TRAINING_DATA_SRC_DIR \
         --training-data-dst-dir=$TRAINING_DATA_DST_DIR \
-        --model-dir output \
+        --model-dir $MODEL_DIR \
         --model $MODEL \
         --force-gpu-idxs $idx \
-        --no-preview \
         --force-model-name $MODEL_NAME \
         --config-file benchmark/config/${config}.yaml \
         --target-iter $TARGET_ITER  \

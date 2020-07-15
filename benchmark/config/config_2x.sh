@@ -1,8 +1,8 @@
 #!/bin/sh
 CONFIGS="\
-LambdaSAEHD_th_liae_ud_3_416_288_168_120 \
+LambdaSAEHD_liae_128_128_64_64 \
 "
 
-GPU_IDXS="0"
+GPU_IDXS="0,1"
 
 # LambdaSAEHD_liae_128_128_64_64 LambdaSAEHD_liae_256_128_64_64 LambdaSAEHD_liae_512_128_64_64
