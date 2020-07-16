@@ -5,7 +5,7 @@ masked_training: True
 uniform_yaw: True
 pretrain_just_disabled: True
 autobackup_hour: 1
-write_preview_history: False
+write_preview_history: True
 random_flip: False
 face_type: wf
 models_opt_on_gpu: True
