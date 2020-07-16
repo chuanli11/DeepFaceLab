@@ -32,6 +32,7 @@ for idx in $GPU_IDXS; do
         --training-data-dst-dir=$TRAINING_DATA_DST_DIR \
         --model-dir $MODEL_DIR \
         --model $MODEL \
+        --no-preview \
         --force-gpu-idxs $idx \
         --force-model-name $MODEL_NAME \
         --config-file benchmark/config/${config}.yaml \
