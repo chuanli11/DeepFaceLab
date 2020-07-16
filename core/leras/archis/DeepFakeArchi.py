@@ -88,7 +88,9 @@ class DeepFakeArchi(nn.ArchiBase):
                 def on_build(self):
                     in_ch, ae_ch, ae_out_ch = self.in_ch, self.ae_ch, self.ae_out_ch
                     if 'u' in opts:
-                        self.dense_norm = nn.DenseNorm()
+                        # Always use float32 for numerical stability
+                        # Otherwise loss can drift to NaN
+                        self.dense_norm = nn.DenseNorm(dtype=tf.float32)
 
                     self.dense1 = nn.Dense( in_ch, ae_ch )
                     self.dense2 = nn.Dense( ae_ch, lowest_dense_res * lowest_dense_res * ae_out_ch )
@@ -97,7 +99,11 @@ class DeepFakeArchi(nn.ArchiBase):
                 def forward(self, inp):
                     x = inp
                     if 'u' in opts:
+                        if nn.floatx == 'float16':
+                            x = tf.cast(x, dtype=tf.float32)
                         x = self.dense_norm(x)
+                        if nn.floatx == 'float16':
+                            x = tf.cast(x, dtype=tf.float16)
                     x = self.dense1(x)
                     x = self.dense2(x)
                     x = nn.reshape_4D (x, lowest_dense_res, lowest_dense_res, self.ae_out_ch)
