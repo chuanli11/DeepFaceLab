@@ -1,0 +1,13 @@
+Running trainer.
+
+
+Model first run.
+Error: invalid literal for int() with base 10: 'log_2020_reproducible'
+Traceback (most recent call last):
+  File "/tmp/ubuntu/DeepFaceLab/mainscripts/Trainer.py", line 65, in trainerThread
+    bs_per_gpu=bs_per_gpu
+  File "/tmp/ubuntu/DeepFaceLab/models/ModelBase.py", line 184, in __init__
+    self.on_initialize_options()
+  File "/tmp/ubuntu/DeepFaceLab/models/Model_LambdaSAEHD/Model.py", line 33, in on_initialize_options
+    self.options['bs_per_gpu'] = int(self.bs_per_gpu)
+ValueError: invalid literal for int() with base 10: 'log_2020_reproducible'
