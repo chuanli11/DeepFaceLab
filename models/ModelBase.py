@@ -38,6 +38,7 @@ class ModelBase(object):
                        target_iter=None,
                        precision=None,
                        bs_per_gpu=None,
+                       use_amp=False,
                        **kwargs):
         self.is_training = is_training
         self.saved_models_path = saved_models_path
@@ -51,6 +52,7 @@ class ModelBase(object):
         self.target_iter=target_iter
         self.precision=precision
         self.bs_per_gpu=bs_per_gpu
+        self.use_amp=use_amp
 
         self.model_class_name = model_class_name = Path(inspect.getmodule(self).__file__).parent.name.rsplit("_", 1)[1]
 
@@ -166,7 +168,7 @@ class ModelBase(object):
             self.device_config = nn.DeviceConfig.GPUIndexes( force_gpu_idxs or nn.ask_choose_device_idxs(suggest_best_multi_gpu=True)) \
                                 if not cpu_only else nn.DeviceConfig.CPU()
         
-        nn.initialize(self.device_config)
+        nn.initialize(self.device_config, floatx=self.precision, use_amp=self.use_amp)
         ####
         self.default_options_path = saved_models_path / f'{self.model_class_name}_default_options.dat'
         self.default_options = {}

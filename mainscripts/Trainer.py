@@ -30,6 +30,7 @@ def trainerThread (s2c, c2s, e,
                     target_iter=None,
                     precision=None,
                     bs_per_gpu=None,
+                    use_amp=None,
                     **kwargs):
     while True:
         try:
@@ -45,6 +46,7 @@ def trainerThread (s2c, c2s, e,
 
             if not saved_models_path.exists():
                 saved_models_path.mkdir(exist_ok=True, parents=True)
+
 
             model = models.import_model(model_class_name)(
                         is_training=True,
@@ -62,9 +64,10 @@ def trainerThread (s2c, c2s, e,
                         config_file=config_file,
                         target_iter=target_iter,
                         precision=precision,
-                        bs_per_gpu=bs_per_gpu
+                        bs_per_gpu=bs_per_gpu,
+                        use_amp=use_amp
                         )
-
+            
             is_reached_goal = model.is_reached_iter_goal()
 
             shared_state = { 'after_save' : False }

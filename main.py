@@ -131,6 +131,7 @@ if __name__ == "__main__":
                   'target_iter'              : arguments.target_iter,
                   'precision'                : arguments.precision,
                   'bs_per_gpu'               : arguments.bs_per_gpu,
+                  'use_amp'                  : arguments.use_amp
                   }
         from mainscripts import Trainer
         Trainer.main(**kwargs)
@@ -152,6 +153,7 @@ if __name__ == "__main__":
     p.add_argument('--target-iter', dest="target_iter", default=50, help="Number of training iterations.")
     p.add_argument('--precision', dest="precision", default='float32', help="Precision for training")
     p.add_argument('--bs-per-gpu', dest="bs_per_gpu", default=1, help="Batch size per GPU")
+    p.add_argument('--use-amp', action="store_true", dest="use_amp", default=False, help="Use automatic mixed precision.")
     p.add_argument('--execute-program', dest="execute_program", default=[], action='append', nargs='+')
     p.set_defaults (func=process_train)
 
