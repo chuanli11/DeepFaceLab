@@ -443,10 +443,7 @@ class LambdaSAEHDModel(ModelBase):
                     else:
                         gpu_src_loss =  tf.reduce_mean ( 5*nn.dssim(gpu_target_src_masked_opt, gpu_pred_src_src_masked_opt, max_val=1.0, filter_size=int(resolution/11.6)), axis=[1])
                         gpu_src_loss += tf.reduce_mean ( 5*nn.dssim(gpu_target_src_masked_opt, gpu_pred_src_src_masked_opt, max_val=1.0, filter_size=int(resolution/23.2)), axis=[1])
-                        #gpu_src_loss = tf.reduce_mean ( 5*nn.dssim(gpu_target_src_masked_opt, gpu_pred_src_src_masked_opt, max_val=1.0, filter_size=int(resolution/23.2)), axis=[1])
                     gpu_src_loss += tf.reduce_mean ( 10*tf.square ( gpu_target_src_masked_opt - gpu_pred_src_src_masked_opt ), axis=[1,2,3])
-                    #gpu_src_loss = tf.reduce_mean ( 10*tf.square ( gpu_target_src_masked_opt - gpu_pred_src_src_masked_opt ), axis=[1,2,3])
-                    #gpu_src_loss = tf.constant(0.0, dtype=tf.float32)
 
                     if eyes_prio:
                         gpu_src_loss += tf.reduce_mean ( 300*tf.abs ( gpu_target_src*gpu_target_srcm_eyes - gpu_pred_src_src*gpu_target_srcm_eyes ), axis=[1,2,3])
@@ -476,10 +473,7 @@ class LambdaSAEHDModel(ModelBase):
                             gpu_pred_dst_dst_masked_opt = tf.cast(gpu_pred_dst_dst_masked_opt, tf.float32)
                         gpu_dst_loss = tf.reduce_mean ( 5*nn.dssim(gpu_target_dst_masked_opt, gpu_pred_dst_dst_masked_opt, max_val=1.0, filter_size=int(resolution/11.6) ), axis=[1])
                         gpu_dst_loss += tf.reduce_mean ( 5*nn.dssim(gpu_target_dst_masked_opt, gpu_pred_dst_dst_masked_opt, max_val=1.0, filter_size=int(resolution/23.2) ), axis=[1])
-                        #gpu_dst_loss = tf.reduce_mean ( 5*nn.dssim(gpu_target_dst_masked_opt, gpu_pred_dst_dst_masked_opt, max_val=1.0, filter_size=int(resolution/23.2) ), axis=[1])
                     gpu_dst_loss += tf.reduce_mean ( 10*tf.square(  gpu_target_dst_masked_opt- gpu_pred_dst_dst_masked_opt ), axis=[1,2,3])
-                    #gpu_dst_loss = tf.reduce_mean ( 10*tf.square(  gpu_target_dst_masked_opt- gpu_pred_dst_dst_masked_opt ), axis=[1,2,3])
-                    #gpu_dst_loss = tf.constant(0.0, dtype=tf.float32)
 
 
 
@@ -543,8 +537,11 @@ class LambdaSAEHDModel(ModelBase):
 
                         gpu_G_loss += gan_G_loss
 
-                    gpu_G_loss_gvs += [ nn.gradients ( gpu_G_loss, self.src_dst_trainable_weights ) ]
-
+                    # Loss scaling for float16
+                    # https://www.tensorflow.org/guide/mixed_precision#loss_scaling
+                    loss_scaler = 1024.0
+                    gpu_G_loss_gvs += [ nn.gradients ( gpu_G_loss * loss_scaler, self.src_dst_trainable_weights ) / loss_scaler ]
+                
 
             # Average losses and gradients, and create optimizer update ops
             with tf.device (models_opt_device):
