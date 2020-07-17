@@ -55,18 +55,18 @@ for idx in $GPU_IDXS; do
         rm -rf $MODEL_DIR && \
         python main.py ${command_para} 2>&1 | tee $LOG_NAME".txt"
 
-        rm -rf $MODEL_DIR && \
-        python main.py train \
-        --training-data-src-dir=$TRAINING_DATA_SRC_DIR \
-        --training-data-dst-dir=$TRAINING_DATA_DST_DIR \
-        --model-dir $MODEL_DIR \
-        --model $MODEL \
-        --no-preview \
-        --force-gpu-idxs $idx \
-        --force-model-name $MODEL_NAME \
-        --config-file benchmark/config/${config}.yaml \
-        --target-iter $TARGET_ITER  \
-        --precision $PRECISION \
-        --bs-per-gpu $BS_PER_GPU 2>&1 | tee $LOG_NAME
+        #rm -rf $MODEL_DIR && \
+        #python main.py train \
+        #--training-data-src-dir=$TRAINING_DATA_SRC_DIR \
+        #--training-data-dst-dir=$TRAINING_DATA_DST_DIR \
+        #--model-dir $MODEL_DIR \
+        #--model $MODEL \
+        #--no-preview \
+        #--force-gpu-idxs $idx \
+        #--force-model-name $MODEL_NAME \
+        #--config-file benchmark/config/${config}.yaml \
+        #--target-iter $TARGET_ITER  \
+        #--precision $PRECISION \
+        #--bs-per-gpu $BS_PER_GPU 2>&1 | tee $LOG_NAME
     done
 done

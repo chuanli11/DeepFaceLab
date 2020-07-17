@@ -2,35 +2,13 @@ import os
 import glob
 import pandas as pd
 
-
-# list_gpu_type = ['TeslaV100-SXM3-32GB']
-# path_config = 'benchmark/log_data'
-# output_file = 'benchmark/benchmark_data.csv'
-# list_config = [
-# 'LambdaSAEHD_liae_128_128_64_64', 'LambdaSAEHD_liae_256_128_64_64', 'LambdaSAEHD_liae_512_128_64_64', \
-# 'LambdaSAEHD_liae_128_128_64_64_syn', 'LambdaSAEHD_liae_256_128_64_64_syn', 'LambdaSAEHD_liae_512_128_64_64_syn', \
-# ]
-# list_gpu_idxs = ['0', '0,1', '0,1,2,3', '0,1,2,3,4,5,6,7', '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15']
-
-#path_config = 'benchmark/log'
-#output_file = 'benchmark/benchmark.csv'
-#list_config = [
-#'LambdaSAEHD_liae_128_128_64_64', 'LambdaSAEHD_liae_128_128_64_64_syn', 'LambdaSAEHD_liae_256_128_64_64', 'LambdaSAEHD_liae_256_128_64_64_syn', \
-#'LambdaSAEHD_liae_gan_128_128_64_64', 'LambdaSAEHD_liae_gan_128_128_64_64_syn', 'LambdaSAEHD_liae_gan_256_128_64_64', 'LambdaSAEHD_liae_gan_256_128_64_64_syn', \
-#'LambdaSAEHD_liae_512_128_64_64', 'LambdaSAEHD_liae_512_128_64_64_syn', \
-#'LambdaSAEHD_liae_128_256_128_128', 'LambdaSAEHD_liae_128_256_128_128_syn', \
-#'LambdaSAEHD_liae_fs_128_128_64_64', 'LambdaSAEHD_liae_fs_128_128_64_64_syn', \
-#'LambdaSAEHD_liae_bs_128_128_64_64', 'LambdaSAEHD_liae_bs_128_128_64_64_syn', \
-#]
-#list_gpu_idxs = ['0', '0,1', '0,1,2,3', '0,1,2,3,4,5,6,7', '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15']
-
-list_gpu_type = ['QuadroRTX8000']
-path_config = 'benchmark/log_20200715'
-output_file = 'benchmark/benchmark_fp32_vs_fp16.csv'
+list_gpu_type = ['TeslaV100-SXM3-32GB']
+path_config = 'benchmark/log_20200717'
+output_file = 'benchmark/benchmark_fp32_vs_amp.csv'
 list_config = [
-'LambdaSAEHD_liae_128_128_64_64', 'LambdaSAEHD_liae_gan_128_128_64_64', \
+'LambdaSAEHD_liae_128_128_64_64', \
 ]
-list_gpu_idxs = ['0', '0,1']
+list_gpu_idxs = ['0']
 
 
 pattern = "]["
@@ -74,7 +52,11 @@ for gpu_type in list_gpu_type:
             log_file = path_config + '/' + config + '_' + str(num_gpu) + 'x' + gpu_type + '*.txt'
             for log_file_name in glob.glob(log_file):
                 items = os.path.basename(log_file_name).split('.')[0].split('_')
-                name = "_".join(items[-3:])
+                if items[-1] == 'amp':
+                    name = "_".join(items[-4:])
+                else:
+                    name = "_".join(items[-3:])
+
                 if not name in list_row:
                     list_row.append(name)
                     print(name)
@@ -88,7 +70,10 @@ for gpu_type in list_gpu_type:
             log_file = path_config + '/' + config + '_' + str(num_gpu) + 'x' + gpu_type + '*.txt'
             for log_file_name in glob.glob(log_file):
                 items = os.path.basename(log_file_name).split('.')[0].split('_')
-                name = "_".join(items[-3:])
+                if items[-1] == 'amp':
+                    name = "_".join(items[-4:])
+                else:
+                    name = "_".join(items[-3:])
                 throughput = get_throughput(log_file_name)
                 df_throughput.at[name, config] = throughput
 
