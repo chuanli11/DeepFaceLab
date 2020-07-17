@@ -351,6 +351,14 @@ class LambdaSAEHDModel(ModelBase):
             bs_per_gpu = max(1, self.get_batch_size() // gpu_count)
             self.set_batch_size( gpu_count*bs_per_gpu)
 
+            # Loss scaling for float16
+            # https://www.tensorflow.org/guide/mixed_precision#loss_scaling
+            if nn.floatx == 'float16':
+                loss_scaler_f = tf.constant(1024.0, dtype=tf.float32)
+                loss_scaler_b = tf.constant(1024.0, dtype=tf.float16)
+            else:
+                loss_scaler_f = tf.constant(1.0, dtype=tf.float32)
+                loss_scaler_b = tf.constant(1.0, dtype=tf.float32)
 
             # Compute losses per GPU
             gpu_pred_src_src_list = []
@@ -505,7 +513,8 @@ class LambdaSAEHDModel(ModelBase):
                         gpu_D_code_loss = (DLoss(gpu_src_code_d_ones , gpu_dst_code_d) + \
                                            DLoss(gpu_src_code_d_zeros, gpu_src_code_d) ) * 0.5
 
-                        gpu_D_code_loss_gvs += [ nn.gradients (gpu_D_code_loss, self.code_discriminator.get_weights() ) ]
+                        gpu_D_code_loss_gvs += [ [(g / loss_scaler_b, v) for g, v in nn.gradients (gpu_D_code_loss * loss_scaler_f, self.code_discriminator.get_weights() )] ]
+                        #gpu_D_code_loss_gvs += [ nn.gradients (gpu_D_code_loss, self.code_discriminator.get_weights() ) ]
 
                     if gan_power != 0:
                         if nn.floatx == 'float16':
@@ -523,12 +532,16 @@ class LambdaSAEHDModel(ModelBase):
                         gpu_target_src_x2_d         = self.D_src_x2(gpu_target_src_masked_opt)
                         gpu_target_src_x2_d_ones    = tf.ones_like(gpu_target_src_x2_d)
 
+
                         gpu_D_src_dst_loss = (DLoss(gpu_target_src_d_ones      , gpu_target_src_d) + \
                                               DLoss(gpu_pred_src_src_d_zeros   , gpu_pred_src_src_d) ) * 0.5 + \
                                              (DLoss(gpu_target_src_x2_d_ones   , gpu_target_src_x2_d) + \
                                               DLoss(gpu_pred_src_src_x2_d_zeros, gpu_pred_src_src_x2_d) ) * 0.5
 
-                        gpu_D_src_dst_loss_gvs += [ nn.gradients (gpu_D_src_dst_loss, self.D_src.get_weights()+self.D_src_x2.get_weights() ) ]
+                        if nn.floatx == 'float16':
+                            gpu_D_src_dst_loss = tf.cast(gpu_D_src_dst_loss, tf.float32)
+                        gpu_D_src_dst_loss_gvs += [[ (g / loss_scaler_b, v) for g, v in nn.gradients (gpu_D_src_dst_loss * loss_scaler_f, self.D_src.get_weights()+self.D_src_x2.get_weights() ) ]]
+                        #gpu_D_src_dst_loss_gvs += [ nn.gradients (gpu_D_src_dst_loss, self.D_src.get_weights()+self.D_src_x2.get_weights() ) ]
 
                         gan_G_loss = 0.5*gan_power*( DLoss(gpu_pred_src_src_d_ones, gpu_pred_src_src_d) + DLoss(gpu_pred_src_src_x2_d_ones, gpu_pred_src_src_x2_d))
 
@@ -537,10 +550,8 @@ class LambdaSAEHDModel(ModelBase):
 
                         gpu_G_loss += gan_G_loss
 
-                    # Loss scaling for float16
-                    # https://www.tensorflow.org/guide/mixed_precision#loss_scaling
-                    loss_scaler = 1024.0
-                    gpu_G_loss_gvs += [ nn.gradients ( gpu_G_loss * loss_scaler, self.src_dst_trainable_weights ) / loss_scaler ]
+                    gpu_G_loss_gvs += [[ (g / loss_scaler_b, v) for g, v in nn.gradients ( gpu_G_loss * loss_scaler_f, self.src_dst_trainable_weights) ]]
+                    #gpu_G_loss_gvs += [ nn.gradients ( gpu_G_loss, self.src_dst_trainable_weights ) ]
                 
 
             # Average losses and gradients, and create optimizer update ops
