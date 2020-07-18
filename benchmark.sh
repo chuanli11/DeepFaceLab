@@ -10,6 +10,7 @@ LOG_DIR=${8:-log_20200715}
 
 
 GPU_NAME="$(nvidia-smi -i 0 --query-gpu=gpu_name --format=csv,noheader | sed 's/ //g' 2>/dev/null || echo PLACEHOLDER )"
+MONITOR_INTERVAL=2
 
 . ${SETTING}".sh"
 
@@ -52,21 +53,24 @@ for idx in $GPU_IDXS; do
             LOG_NAME="${LOG_NAME}_amp"
         fi
 
-        rm -rf $MODEL_DIR && \
-        python main.py ${command_para} 2>&1 | tee $LOG_NAME".txt"
+        MEM_NAME=${LOG_NAME}_mem
+        
+        echo $MEM_NAME        
+        flag_monitor=true
 
-        #rm -rf $MODEL_DIR && \
-        #python main.py train \
-        #--training-data-src-dir=$TRAINING_DATA_SRC_DIR \
-        #--training-data-dst-dir=$TRAINING_DATA_DST_DIR \
-        #--model-dir $MODEL_DIR \
-        #--model $MODEL \
-        #--no-preview \
-        #--force-gpu-idxs $idx \
-        #--force-model-name $MODEL_NAME \
-        #--config-file benchmark/config/${config}.yaml \
-        #--target-iter $TARGET_ITER  \
-        #--precision $PRECISION \
-        #--bs-per-gpu $BS_PER_GPU 2>&1 | tee $LOG_NAME
+        rm -rf $MODEL_DIR && rm -f ${MEM_NAME}".csv" && \
+        python main.py ${command_para} 2>&1 | tee $LOG_NAME".txt" &
+        while $flag_monitor;
+        do
+            sleep $MONITOR_INTERVAL 
+            last_line="$(tail -1 ${LOG_NAME}".txt")"
+            if [[ $last_line == *"Done."* ]]; then
+                flag_monitor=false
+            else
+                status="$(nvidia-smi -i $idx --query-gpu=temperature.gpu,utilization.gpu,memory.used --format=csv | tail -1)"
+                echo "${status}" >> ${MEM_NAME}".csv"
+            fi
+        done
+        echo "${LOG_NAME} is done" 
     done
 done
