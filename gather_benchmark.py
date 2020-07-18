@@ -6,7 +6,9 @@ list_gpu_type = ['TeslaV100-SXM3-32GB']
 path_config = 'benchmark/log_20200717'
 output_file = 'benchmark/benchmark_fp32_vs_amp.csv'
 list_config = [
-'LambdaSAEHD_liae_128_128_64_64', \
+'LambdaSAEHD_liae_128_128_64_64', 'LambdaSAEHD_liae_gan_128_128_64_64', \
+'LambdaSAEHD_liae_ud_128_128_64_64', 'LambdaSAEHD_liae_ud_gan_128_128_64_64', \
+'LambdaSAEHD_th_liae_ud_3_416_288_168_120' \
 ]
 list_gpu_idxs = ['0']
 
@@ -74,6 +76,7 @@ for gpu_type in list_gpu_type:
                     name = "_".join(items[-4:])
                 else:
                     name = "_".join(items[-3:])
+                print(log_file_name)
                 throughput = get_throughput(log_file_name)
                 df_throughput.at[name, config] = throughput
 
