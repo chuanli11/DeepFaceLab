@@ -2,13 +2,11 @@ import os
 import glob
 import pandas as pd
 
-list_gpu_type = ['TeslaV100-SXM3-32GB']
-path_config = 'benchmark/log_20200717'
-output_file = 'benchmark/benchmark_fp32_vs_amp.csv'
+list_gpu_type = ['QuadroRTX8000']
+path_config = 'benchmark/log_xla'
+output_file = 'benchmark/benchmark_xla_fp32_vs_amp.csv'
 list_config = [
-'LambdaSAEHD_liae_128_128_64_64', 'LambdaSAEHD_liae_gan_128_128_64_64', \
-'LambdaSAEHD_liae_ud_128_128_64_64', 'LambdaSAEHD_liae_ud_gan_128_128_64_64', \
-'LambdaSAEHD_th_liae_ud_3_416_288_168_120' \
+'LambdaSAEHD_liae_128_128_64_64', 'LambdaSAEHD_liae_gan_128_128_64_64' \
 ]
 list_gpu_idxs = ['0']
 
@@ -38,6 +36,7 @@ def get_throughput(log_file_name):
         if 'batch_size' in line:
             bs = line.split(' ')[13]
         if pattern in line:
+
             if count == 1:
                 time_second_iter = line.split('][')[0][1:]
             count += 1
