@@ -72,5 +72,6 @@ for idx in $GPU_IDXS; do
             fi
         done
         echo "${LOG_NAME} is done" 
+	rm -rf $MODEL_DIR
     done
 done
