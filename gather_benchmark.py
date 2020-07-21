@@ -2,11 +2,12 @@ import os
 import glob
 import pandas as pd
 
-list_gpu_type = ['QuadroRTX8000']
+#list_gpu_type = ['QuadroRTX8000']
+list_gpu_type = ['TeslaV100-SXM3-32GB']
 path_config = 'benchmark/log_xla'
 output_file = 'benchmark/benchmark_xla_fp32_vs_amp.csv'
 list_config = [
-'LambdaSAEHD_liae_128_128_64_64', 'LambdaSAEHD_liae_gan_128_128_64_64' \
+'LambdaSAEHD_th_liae_ud_3_416_288_168_120' \
 ]
 list_gpu_idxs = ['0']
 
@@ -76,7 +77,10 @@ for gpu_type in list_gpu_type:
                 else:
                     name = "_".join(items[-3:])
                 print(log_file_name)
-                throughput = get_throughput(log_file_name)
+                try:
+                    throughput = get_throughput(log_file_name)
+                except:
+                    throughput = 0.0
                 df_throughput.at[name, config] = throughput
 
 df_throughput.to_csv(output_file)
