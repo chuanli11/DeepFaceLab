@@ -14,7 +14,6 @@ from core.interact import interact as io
 
 from core.leras import nn
 
-
 def trainerThread (s2c, c2s, e,
                     model_class_name = None,
                     saved_models_path = None,
@@ -51,7 +50,7 @@ def trainerThread (s2c, c2s, e,
                 saved_models_path.mkdir(exist_ok=True, parents=True)
 
 
-            model = models.import_model(model_class_name)(
+            model = models.import_model_tf1(model_class_name)(
                         is_training=True,
                         saved_models_path=saved_models_path,
                         training_data_src_path=training_data_src_path,
@@ -70,186 +69,169 @@ def trainerThread (s2c, c2s, e,
                         bs_per_gpu=bs_per_gpu,
                         use_amp=use_amp
                         )
+            
+            is_reached_goal = model.is_reached_iter_goal()
+
+            shared_state = { 'after_save' : False }
+            loss_string = ""
+            save_iter =  model.get_iter()
+            def model_save():
+                if not debug and not is_reached_goal:
+                    io.log_info ("Saving....", end='\r')
+                    model.save()
+                    shared_state['after_save'] = True
+                    
+            def model_backup():
+                if not debug and not is_reached_goal:
+                    model.create_backup()             
+
+            def send_preview():
+                # if not debug:
+                #     previews = model.get_previews()
+                #     c2s.put ( {'op':'show', 'previews': previews, 'iter':model.get_iter(), 'loss_history': model.get_loss_history().copy() } )
+                # else:
+                #     previews = [( 'debug, press update for new', model.debug_one_iter())]
+                #     c2s.put ( {'op':'show', 'previews': previews} )
+                e.set() #Set the GUI Thread as Ready
+
+            if model.get_target_iter() != 0:
+                if is_reached_goal:
+                    io.log_info('Model already trained to target iteration. You can use preview.')
+                else:
+                    io.log_info('Starting. Target iteration: %d. Press "Enter" to stop training and save model.' % ( model.get_target_iter()  ) )
+            else:
+                io.log_info('Starting. Press "Enter" to stop training and save model.')
+
+            last_save_time = time.time()
+
+            execute_programs = [ [x[0], x[1], time.time() ] for x in execute_programs ]
 
             tf = nn.tf
             optimizer = tf.train.AdamOptimizer(learning_rate=1E-3)
             global_step = tf.train.get_or_create_global_step()
             update_op = optimizer.minimize(model.gpu_G_loss, global_step=global_step)
-            # ( (warped_src, target_src, target_srcm_all), \
-            #   (warped_dst, target_dst, target_dstm_all) ) = model.generate_next_samples()
 
-            with nn.tf_sess as sess:
-                sess.run(tf.global_variables_initializer())
-                for i in itertools.count(0,1):
-                    t_start = time.time()
-                    ( (warped_src, target_src, target_srcm_all), \
-                      (warped_dst, target_dst, target_dstm_all) ) = model.generate_next_samples()
-                    sess.run(update_op, feed_dict={
-                        model.warped_src :warped_src,
-                        model.target_src :target_src,
-                        model.target_srcm_all:target_srcm_all,
-                        model.warped_dst :warped_dst,
-                        model.target_dst :target_dst,
-                        model.target_dstm_all:target_dstm_all})
-                    t_end = time.time()
-                    print(t_end - t_start)
-                    if i == int(target_iter) - 1:
+            nn.tf_sess.run(tf.global_variables_initializer())
+
+            for i in itertools.count(0,1):
+                if not debug:
+                    cur_time = time.time()
+
+                    for x in execute_programs:
+                        prog_time, prog, last_time = x
+                        exec_prog = False
+                        if prog_time > 0 and (cur_time - start_time) >= prog_time:
+                            x[0] = 0
+                            exec_prog = True
+                        elif prog_time < 0 and (cur_time - last_time)  >= -prog_time:
+                            x[2] = cur_time
+                            exec_prog = True
+
+                        if exec_prog:
+                            try:
+                                exec(prog)
+                            except Exception as e:
+                                print("Unable to execute program: %s" % (prog) )
+
+                    if not is_reached_goal:
+
+                        if model.get_iter() == 0:
+                            io.log_info("")
+                            io.log_info("Trying to do the first iteration. If an error occurs, reduce the model parameters.")
+                            io.log_info("")
+
+                        t_start = time.time()
+                        ( (warped_src, target_src, target_srcm_all), \
+                          (warped_dst, target_dst, target_dstm_all) ) = model.generate_next_samples()
+                        nn.tf_sess.run(update_op, feed_dict={
+                            model.warped_src :warped_src,
+                            model.target_src :target_src,
+                            model.target_srcm_all:target_srcm_all,
+                            model.warped_dst :warped_dst,
+                            model.target_dst :target_dst,
+                            model.target_dstm_all:target_dstm_all})
+                        model.iter += 1
+                        iter_time = time.time() - t_start
+
+                        # iter, iter_time = model.train_one_iter()
+                        iter = model.get_iter()
+
+                        # loss_history = model.get_loss_history()
+                        time_str = time.strftime("[%H:%M:%S]")
+                        if iter_time >= 10:
+                            loss_string = "{0}[#{1:06d}][{2:.5s}s]".format ( time_str, iter, '{:0.4f}'.format(iter_time) )
+                        else:
+                            loss_string = "{0}[#{1:06d}][{2:04d}ms]".format ( time_str, iter, int(iter_time*1000) )
+
+                        if shared_state['after_save']:
+                            shared_state['after_save'] = False
+                            
+                            # mean_loss = np.mean ( loss_history[save_iter:iter], axis=0)
+
+                            # for loss_value in mean_loss:
+                            #     loss_string += "[%.4f]" % (loss_value)
+
+                            io.log_info (loss_string)
+
+                            save_iter = iter
+                        else:
+                            # for loss_value in loss_history[-1]:
+                            #     loss_string += "[%.4f]" % (loss_value)
+
+                            if io.is_colab():
+                                io.log_info ('\r' + loss_string, end='')
+                            else:
+                                io.log_info (loss_string, end='\r')
+
+                        if model.get_iter() == 1:
+                            model_save()
+
+                        if model.get_target_iter() != 0 and model.is_reached_iter_goal():
+                            io.log_info ('\nReached target iteration.')
+                            model_save()
+                            is_reached_goal = True
+                            break
+                            io.log_info ('You can use preview now.')
+
+                if not is_reached_goal and (time.time() - last_save_time) >= save_interval_min*60:
+                    last_save_time += save_interval_min*60
+                    model_save()
+                    send_preview()
+
+                if i==0:
+                    if is_reached_goal:
+                        model.pass_one_iter()
+                    send_preview()
+
+                if debug:
+                    time.sleep(0.005)
+
+                while not s2c.empty():
+                    input = s2c.get()
+                    op = input['op']
+                    if op == 'save':
+                        model_save()
+                    elif op == 'backup':
+                        model_backup()
+                    elif op == 'preview':
+                        if is_reached_goal:
+                            model.pass_one_iter()
+                        send_preview()
+                    elif op == 'close':
+                        model_save()
+                        i = -1
                         break
 
+                if i == -1:
+                    break
 
-            # with tf.Session() as sess:
-            #     for i in itertools.count(0,1):
-            #         bs = model.get_batch_size()
-            #         ( (warped_src, target_src, target_srcm_all), \
-            #           (warped_dst, target_dst, target_dstm_all) ) = model.generate_next_samples()
-
-                # src_loss, dst_loss = model.src_dst_train (warped_src, target_src, target_srcm_all, warped_dst, target_dst, target_dstm_all)
-
-
-            # is_reached_goal = model.is_reached_iter_goal()
-
-            # shared_state = { 'after_save' : False }
-            # loss_string = ""
-            # save_iter =  model.get_iter()
-            # def model_save():
-            #     if not debug and not is_reached_goal:
-            #         io.log_info ("Saving....", end='\r')
-            #         model.save()
-            #         shared_state['after_save'] = True
-                    
-            # def model_backup():
-            #     if not debug and not is_reached_goal:
-            #         model.create_backup()             
-
-            # def send_preview():
-            #     if not debug:
-            #         previews = model.get_previews()
-            #         c2s.put ( {'op':'show', 'previews': previews, 'iter':model.get_iter(), 'loss_history': model.get_loss_history().copy() } )
-            #     else:
-            #         previews = [( 'debug, press update for new', model.debug_one_iter())]
-            #         c2s.put ( {'op':'show', 'previews': previews} )
-            #     e.set() #Set the GUI Thread as Ready
-
-            # if model.get_target_iter() != 0:
-            #     if is_reached_goal:
-            #         io.log_info('Model already trained to target iteration. You can use preview.')
-            #     else:
-            #         io.log_info('Starting. Target iteration: %d. Press "Enter" to stop training and save model.' % ( model.get_target_iter()  ) )
-            # else:
-            #     io.log_info('Starting. Press "Enter" to stop training and save model.')
-
-            # last_save_time = time.time()
-
-            # execute_programs = [ [x[0], x[1], time.time() ] for x in execute_programs ]
-
-            # for i in itertools.count(0,1):
-            #     if not debug:
-            #         cur_time = time.time()
-
-            #         for x in execute_programs:
-            #             prog_time, prog, last_time = x
-            #             exec_prog = False
-            #             if prog_time > 0 and (cur_time - start_time) >= prog_time:
-            #                 x[0] = 0
-            #                 exec_prog = True
-            #             elif prog_time < 0 and (cur_time - last_time)  >= -prog_time:
-            #                 x[2] = cur_time
-            #                 exec_prog = True
-
-            #             if exec_prog:
-            #                 try:
-            #                     exec(prog)
-            #                 except Exception as e:
-            #                     print("Unable to execute program: %s" % (prog) )
-
-            #         if not is_reached_goal:
-
-            #             if model.get_iter() == 0:
-            #                 io.log_info("")
-            #                 io.log_info("Trying to do the first iteration. If an error occurs, reduce the model parameters.")
-            #                 io.log_info("")
-
-            #             iter, iter_time = model.train_one_iter()
-
-            #             loss_history = model.get_loss_history()
-            #             time_str = time.strftime("[%H:%M:%S]")
-            #             if iter_time >= 10:
-            #                 loss_string = "{0}[#{1:06d}][{2:.5s}s]".format ( time_str, iter, '{:0.4f}'.format(iter_time) )
-            #             else:
-            #                 loss_string = "{0}[#{1:06d}][{2:04d}ms]".format ( time_str, iter, int(iter_time*1000) )
-
-            #             if shared_state['after_save']:
-            #                 shared_state['after_save'] = False
-                            
-            #                 mean_loss = np.mean ( loss_history[save_iter:iter], axis=0)
-
-            #                 for loss_value in mean_loss:
-            #                     loss_string += "[%.4f]" % (loss_value)
-
-            #                 io.log_info (loss_string)
-
-            #                 save_iter = iter
-            #             else:
-            #                 for loss_value in loss_history[-1]:
-            #                     loss_string += "[%.4f]" % (loss_value)
-
-            #                 if io.is_colab():
-            #                     io.log_info ('\r' + loss_string, end='')
-            #                 else:
-            #                     io.log_info (loss_string, end='\r')
-
-            #             if model.get_iter() == 1:
-            #                 model_save()
-
-            #             if model.get_target_iter() != 0 and model.is_reached_iter_goal():
-            #                 io.log_info ('\nReached target iteration.')
-            #                 model_save()
-            #                 is_reached_goal = True
-            #                 break
-            #                 io.log_info ('You can use preview now.')
-
-            #     if not is_reached_goal and (time.time() - last_save_time) >= save_interval_min*60:
-            #         last_save_time += save_interval_min*60
-            #         model_save()
-            #         send_preview()
-
-            #     if i==0:
-            #         if is_reached_goal:
-            #             model.pass_one_iter()
-            #         send_preview()
-
-            #     if debug:
-            #         time.sleep(0.005)
-
-            #     while not s2c.empty():
-            #         input = s2c.get()
-            #         op = input['op']
-            #         if op == 'save':
-            #             model_save()
-            #         elif op == 'backup':
-            #             model_backup()
-            #         elif op == 'preview':
-            #             if is_reached_goal:
-            #                 model.pass_one_iter()
-            #             send_preview()
-            #         elif op == 'close':
-            #             model_save()
-            #             i = -1
-            #             break
-
-            #     if i == -1:
-            #         break
-
-
-
-            # model.finalize()
+            model.finalize()
 
         except Exception as e:
             print ('Error: %s' % (str(e)))
             traceback.print_exc()
         break
     c2s.put ( {'op':'close'} )
-
 
 
 def main(**kwargs):

@@ -21,7 +21,7 @@ class LambdaSAEHDModel(ModelBase):
     #override
     def on_initialize_options(self):
         device_config = nn.getCurrentDeviceConfig()
-
+        print('Hey Model is called -------------------------------------------------------------')
         if not self.config_file is None:                    
             with open(self.config_file) as file:
                 options_list = yaml.load(file, Loader=yaml.FullLoader)

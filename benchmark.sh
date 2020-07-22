@@ -7,7 +7,7 @@ PRECISION=${5:-float32}
 AMP=${6:-off}
 BS_PER_GPU=${7:-1}
 LOG_DIR=${8:-log_20200715}
-
+API=${9:-dfl}
 
 GPU_NAME="$(nvidia-smi -i 0 --query-gpu=gpu_name --format=csv,noheader | sed 's/ //g' 2>/dev/null || echo PLACEHOLDER )"
 MONITOR_INTERVAL=0.1
@@ -29,6 +29,8 @@ for idx in $GPU_IDXS; do
             LOG_NAME=benchmark/${LOG_DIR}/${config}_${NUM_GPU}x${GPU_NAME}_bs${BS_PER_GPU}_fp32
         fi
 
+        LOG_NAME=${LOG_NAME}_${API}
+
         MODEL_DIR=output/$(echo "$LOG_NAME" | cut -f 1 -d '.')
         
         if [ "$AMP" == "on" ]; then
@@ -46,7 +48,8 @@ for idx in $GPU_IDXS; do
         --config-file benchmark/config/${config}.yaml \
         --target-iter ${TARGET_ITER} \
         --precision ${PRECISION} \
-        --bs-per-gpu ${BS_PER_GPU}"
+        --bs-per-gpu ${BS_PER_GPU} \
+        --api ${API}"
 
         if [ "$AMP" == "on" ]; then
             command_para="${command_para} --use-amp"
@@ -54,10 +57,10 @@ for idx in $GPU_IDXS; do
         fi
 
         MEM_NAME=${LOG_NAME}_mem
-        
-        echo $MEM_NAME        
-        flag_monitor=true
 
+        echo $command_para
+
+        flag_monitor=true
         rm -rf $MODEL_DIR && rm -f ${MEM_NAME}".csv" && \
         python main.py ${command_para} 2>&1 | tee $LOG_NAME".txt" &
         while $flag_monitor;
@@ -72,6 +75,7 @@ for idx in $GPU_IDXS; do
             fi
         done
         echo "${LOG_NAME} is done" 
-	rm -rf $MODEL_DIR
+        rm -rf $MODEL_DIR
+
     done
 done

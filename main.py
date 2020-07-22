@@ -133,11 +133,16 @@ if __name__ == "__main__":
                   'bs_per_gpu'               : arguments.bs_per_gpu,
                   'use_amp'                  : arguments.use_amp
                   }
-        from mainscripts import Trainer_Lambda
-        Trainer_Lambda.main(**kwargs)
 
-        #from mainscripts import Trainer
-        #Trainer.main(**kwargs)
+        if arguments.api == 'dfl':
+          from mainscripts import Trainer
+          Trainer.main(**kwargs)
+        elif arguments.api == 'tf1':
+          from mainscripts import Trainer_tf1
+          Trainer_tf1.main(**kwargs)
+        else:
+          print('Training API {} is invalid'.format(arguments.api))
+          exit(0)
 
     p = subparsers.add_parser( "train", help="Trainer")
     p.add_argument('--training-data-src-dir', required=True, action=fixPathAction, dest="training_data_src_dir", help="Dir of extracted SRC faceset.")
@@ -157,6 +162,7 @@ if __name__ == "__main__":
     p.add_argument('--precision', dest="precision", default='float32', help="Precision for training")
     p.add_argument('--bs-per-gpu', dest="bs_per_gpu", default=1, help="Batch size per GPU")
     p.add_argument('--use-amp', action="store_true", dest="use_amp", default=False, help="Use automatic mixed precision.")
+    p.add_argument('--api', required=True, dest="api", choices=['dfl', 'tf1'], help="API for training.")
     p.add_argument('--execute-program', dest="execute_program", default=[], action='append', nargs='+')
     p.set_defaults (func=process_train)
 
@@ -373,7 +379,6 @@ if __name__ == "__main__":
         parser.print_help()
         exit(0)
     parser.set_defaults(func=bad_args)
-
     arguments = parser.parse_args()
     arguments.func(arguments)
 
