@@ -81,6 +81,7 @@ def trainerThread (s2c, c2s, e,
             with nn.tf_sess as sess:
                 sess.run(tf.global_variables_initializer())
                 for i in itertools.count(0,1):
+                    t_start = time.time()
                     ( (warped_src, target_src, target_srcm_all), \
                       (warped_dst, target_dst, target_dstm_all) ) = model.generate_next_samples()
                     sess.run(update_op, feed_dict={
@@ -90,7 +91,10 @@ def trainerThread (s2c, c2s, e,
                         model.warped_dst :warped_dst,
                         model.target_dst :target_dst,
                         model.target_dstm_all:target_dstm_all})
-                    print(i)
+                    t_end = time.time()
+                    print(t_end - t_start)
+                    if i == int(target_iter) - 1:
+                        break
 
 
             # with tf.Session() as sess:

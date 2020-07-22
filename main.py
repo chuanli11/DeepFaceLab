@@ -136,6 +136,9 @@ if __name__ == "__main__":
         from mainscripts import Trainer_Lambda
         Trainer_Lambda.main(**kwargs)
 
+        #from mainscripts import Trainer
+        #Trainer.main(**kwargs)
+
     p = subparsers.add_parser( "train", help="Trainer")
     p.add_argument('--training-data-src-dir', required=True, action=fixPathAction, dest="training_data_src_dir", help="Dir of extracted SRC faceset.")
     p.add_argument('--training-data-dst-dir', required=True, action=fixPathAction, dest="training_data_dst_dir", help="Dir of extracted DST faceset.")
