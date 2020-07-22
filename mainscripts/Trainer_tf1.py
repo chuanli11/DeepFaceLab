@@ -143,20 +143,22 @@ def trainerThread (s2c, c2s, e,
                         t_start = time.time()
                         ( (warped_src, target_src, target_srcm_all), \
                           (warped_dst, target_dst, target_dstm_all) ) = model.generate_next_samples()
-                        nn.tf_sess.run(update_op, feed_dict={
+                        _, loss = nn.tf_sess.run([update_op, model.gpu_G_loss], feed_dict={
                             model.warped_src :warped_src,
                             model.target_src :target_src,
                             model.target_srcm_all:target_srcm_all,
                             model.warped_dst :warped_dst,
                             model.target_dst :target_dst,
                             model.target_dstm_all:target_dstm_all})
+
+                        model.loss_history.append ( [float(np.mean(loss))] )
                         model.iter += 1
                         iter_time = time.time() - t_start
-
-                        # iter, iter_time = model.train_one_iter()
                         iter = model.get_iter()
 
-                        # loss_history = model.get_loss_history()
+                        # iter, iter_time = model.train_one_iter()
+                        
+                        loss_history = model.get_loss_history()
                         time_str = time.strftime("[%H:%M:%S]")
                         if iter_time >= 10:
                             loss_string = "{0}[#{1:06d}][{2:.5s}s]".format ( time_str, iter, '{:0.4f}'.format(iter_time) )
@@ -166,17 +168,17 @@ def trainerThread (s2c, c2s, e,
                         if shared_state['after_save']:
                             shared_state['after_save'] = False
                             
-                            # mean_loss = np.mean ( loss_history[save_iter:iter], axis=0)
+                            mean_loss = np.mean ( loss_history[save_iter:iter], axis=0)
 
-                            # for loss_value in mean_loss:
-                            #     loss_string += "[%.4f]" % (loss_value)
+                            for loss_value in mean_loss:
+                                loss_string += "[%.4f]" % (loss_value)
 
                             io.log_info (loss_string)
 
                             save_iter = iter
                         else:
-                            # for loss_value in loss_history[-1]:
-                            #     loss_string += "[%.4f]" % (loss_value)
+                            for loss_value in loss_history[-1]:
+                                loss_string += "[%.4f]" % (loss_value)
 
                             if io.is_colab():
                                 io.log_info ('\r' + loss_string, end='')
