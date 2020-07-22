@@ -67,7 +67,7 @@ for idx in $GPU_IDXS; do
             if [[ $last_line == *"Done."* ]]; then
                 flag_monitor=false
             else
-                status="$(nvidia-smi -i $idx --query-gpu=temperature.gpu,utilization.gpu,memory.used --format=csv | tail -1)"
+                status="$(nvidia-smi -i $idx --query-gpu=temperature.gpu,utilization.gpu,memory.used --format=csv)"
                 echo "${status}" >> ${MEM_NAME}".csv"
             fi
         done

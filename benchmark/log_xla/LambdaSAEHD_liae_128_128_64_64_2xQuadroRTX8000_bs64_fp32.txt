@@ -1,0 +1,5 @@
+Running trainer.
+
+
+Model first run.
+Initializing models:   0%|          | 0/5 [00:00<?, ?it/s]Initializing models:  20%|##        | 1/5 [00:03<00:12,  3.16s/it]Initializing models:  40%|####      | 2/5 [00:05<00:08,  2.98s/it]Initializing models:  60%|######    | 3/5 [00:08<00:05,  2.89s/it]
