@@ -133,8 +133,8 @@ if __name__ == "__main__":
                   'bs_per_gpu'               : arguments.bs_per_gpu,
                   'use_amp'                  : arguments.use_amp
                   }
-        from mainscripts import Trainer
-        Trainer.main(**kwargs)
+        from mainscripts import Trainer_Lambda
+        Trainer_Lambda.main(**kwargs)
 
     p = subparsers.add_parser( "train", help="Trainer")
     p.add_argument('--training-data-src-dir', required=True, action=fixPathAction, dest="training_data_src_dir", help="Dir of extracted SRC faceset.")

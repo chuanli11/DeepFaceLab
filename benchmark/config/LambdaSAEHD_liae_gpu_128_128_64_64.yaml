@@ -1,4 +1,4 @@
-use_syn: False
+use_syn: True
 use_benchmark: True
 resolution: 128
 masked_training: True
