@@ -38,6 +38,7 @@ def main():
 				num_gpu = line_count - mark_count
 				break
 
+
 	list_gpu = [str(i) for i in range(num_gpu)]
 
 	df_temp = []
@@ -58,9 +59,8 @@ def main():
 				mem.append(float((iterms[2][:-4]))/1000)
 			gpu_idx += 1
 
-			if gpu_idx == 3:
+			if gpu_idx == num_gpu + 1:
 				gpu_idx = 0
-
 				if len(df_temp)==0:
 					df_temp = pd.DataFrame([temp], columns=list_gpu)
 					df_util = pd.DataFrame([util], columns=list_gpu)
