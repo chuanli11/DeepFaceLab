@@ -70,6 +70,12 @@ def trainerThread (s2c, c2s, e,
                         use_amp=use_amp
                         )
             
+            # print(model.src_dst_trainable_weights)
+            # print(len(model.D_code_trainable_weights))
+            # print(len(model.D_src_dst_trainable_weights))
+
+            # sys.exit()
+
             is_reached_goal = model.is_reached_iter_goal()
 
             shared_state = { 'after_save' : False }
@@ -109,7 +115,18 @@ def trainerThread (s2c, c2s, e,
             tf = nn.tf
             optimizer = tf.train.AdamOptimizer(learning_rate=1E-3)
             global_step = tf.train.get_or_create_global_step()
-            update_op = optimizer.minimize(model.gpu_G_loss, global_step=global_step)
+
+            # Auto-encoder loss
+            src_dst_update_op = optimizer.minimize(model.G_loss, global_step=global_step, var_list=model.src_dst_trainable_weights)
+
+            # True face loss
+            if model.options['true_face_power'] != 0:
+                D_code_update_op  = optimizer.minimize(model.D_code_loss, global_step=global_step, var_list=model.D_code_trainable_weights)
+
+            # GAN loss
+            if model.options['gan_power'] != 0:
+                D_src_dst_update_op = optimizer.minimize(model.D_src_dst_loss, global_step=global_step, var_list=model.D_src_dst_trainable_weights)
+
 
             nn.tf_sess.run(tf.global_variables_initializer())
 
@@ -143,15 +160,49 @@ def trainerThread (s2c, c2s, e,
                         t_start = time.time()
                         ( (warped_src, target_src, target_srcm_all), \
                           (warped_dst, target_dst, target_dstm_all) ) = model.generate_next_samples()
-                        _, loss = nn.tf_sess.run([update_op, model.gpu_G_loss], feed_dict={
+
+                        # Train auto-encoder
+                        _, src_loss, dst_loss = nn.tf_sess.run([src_dst_update_op, model.src_loss, model.dst_loss], feed_dict={
                             model.warped_src :warped_src,
                             model.target_src :target_src,
                             model.target_srcm_all:target_srcm_all,
                             model.warped_dst :warped_dst,
                             model.target_dst :target_dst,
                             model.target_dstm_all:target_dstm_all})
+                        list_loss = [float(src_loss), float(dst_loss)]
 
-                        model.loss_history.append ( [float(np.mean(loss))] )
+                        # # Train face style
+                        if model.options['true_face_power'] != 0:
+                            # D_code_loss = nn.tf_sess.run(model.D_code_loss, feed_dict={
+                            # model.warped_src :warped_src,
+                            # model.warped_dst :warped_dst})                            
+                            # _, D_code_loss = nn.tf_sess.run([D_code_update_op, model.D_code_loss], feed_dict={
+                            # model.warped_src :warped_src,
+                            # model.warped_dst :warped_dst})
+
+                            _, D_code_loss = nn.tf_sess.run([D_code_update_op, model.D_code_loss], feed_dict={
+                                model.warped_src :warped_src,
+                                model.target_src :target_src,
+                                model.target_srcm_all:target_srcm_all,
+                                model.warped_dst :warped_dst,
+                                model.target_dst :target_dst,
+                                model.target_dstm_all:target_dstm_all})
+                            list_loss.append(float(D_code_loss))
+
+                        # Train GAN
+                        if model.options['gan_power'] != 0:
+                            _, D_src_dst_loss = nn.tf_sess.run([D_src_dst_update_op, model.D_src_dst_loss], feed_dict={
+                                model.warped_src :warped_src,
+                                model.target_src :target_src,
+                                model.target_srcm_all:target_srcm_all,
+                                model.warped_dst :warped_dst,
+                                model.target_dst :target_dst,
+                                model.target_dstm_all:target_dstm_all})
+                            list_loss.append(float(D_src_dst_loss))
+                            # print(D_src_dst_loss)                         
+
+
+                        model.loss_history.append ( list_loss )
                         model.iter += 1
                         iter_time = time.time() - t_start
                         iter = model.get_iter()

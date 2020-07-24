@@ -1,0 +1,14 @@
+Running trainer.
+
+
+Model first run.
+48
+Error: 'LambdaSAEHDModel' object has no attribute 'code_discriminator'
+Traceback (most recent call last):
+  File "/home/ubuntu/DeepFaceLab_chuanli11/mainscripts/Trainer_tf1.py", line 70, in trainerThread
+    use_amp=use_amp
+  File "/home/ubuntu/DeepFaceLab_chuanli11/models/ModelBase.py", line 197, in __init__
+    self.on_initialize()
+  File "/home/ubuntu/DeepFaceLab_chuanli11/models/Model_LambdaSAEHD/Model_tf1.py", line 341, in on_initialize
+    self.true_face_power_trainable_weights = self.code_discriminator.get_weights()
+AttributeError: 'LambdaSAEHDModel' object has no attribute 'code_discriminator'

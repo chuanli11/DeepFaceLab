@@ -589,7 +589,9 @@ class LambdaSAEHDModel(ModelBase):
 
             if self.options['true_face_power'] != 0:
                 def D_train(warped_src, warped_dst):
-                    nn.tf_sess.run ([D_loss_gv_op], feed_dict={self.warped_src: warped_src, self.warped_dst: warped_dst})
+                    # nn.tf_sess.run ([D_loss_gv_op], feed_dict={self.warped_src: warped_src, self.warped_dst: warped_dst})
+                    D_code_loss, _ = nn.tf_sess.run ([gpu_D_code_loss, D_loss_gv_op], feed_dict={self.warped_src: warped_src, self.warped_dst: warped_dst})
+                    return D_code_loss
                 self.D_train = D_train
 
             if gan_power != 0:
@@ -741,12 +743,13 @@ class LambdaSAEHDModel(ModelBase):
 
         if self.options['true_face_power'] != 0 and not self.pretrain:
             self.D_train (warped_src, warped_dst)
+            D_code_loss = self.D_train (warped_src, warped_dst)
 
         if self.gan_power != 0:
             self.D_src_dst_train (warped_src, target_src, target_srcm_all, warped_dst, target_dst, target_dstm_all)
 
-        return ( ('src_loss', np.mean(src_loss) ), ('dst_loss', np.mean(dst_loss) ), )
-
+        # return ( ('src_loss', np.mean(src_loss) ), ('dst_loss', np.mean(dst_loss) ), )
+        return ( ('src_loss', np.mean(src_loss) ), ('dst_loss', np.mean(dst_loss) ), ('D_code_loss', np.mean(D_code_loss)))
 
     def onDataOneIter(self):
         if self.get_iter() == 0 and not self.pretrain and not self.pretrain_just_disabled:

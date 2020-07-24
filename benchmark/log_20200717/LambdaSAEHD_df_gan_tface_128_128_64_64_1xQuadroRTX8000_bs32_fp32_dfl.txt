@@ -1,0 +1,5 @@
+Running trainer.
+
+
+Model first run.
+Initializing models:   0%|          | 0/10 [00:00<?, ?it/s]
