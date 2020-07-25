@@ -224,6 +224,7 @@ class ModelBase(object):
                 if not self.autobackups_path.exists():
                     self.autobackups_path.mkdir(exist_ok=True)
 
+        self.options['use_amp'] = self.use_amp
         io.log_info( self.get_summary_text() )
 
     def update_sample_for_preview(self, choose_preview_history=False, force_new=False):

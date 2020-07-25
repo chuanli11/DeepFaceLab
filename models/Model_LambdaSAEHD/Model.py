@@ -748,8 +748,8 @@ class LambdaSAEHDModel(ModelBase):
         if self.gan_power != 0:
             self.D_src_dst_train (warped_src, target_src, target_srcm_all, warped_dst, target_dst, target_dstm_all)
 
-        # return ( ('src_loss', np.mean(src_loss) ), ('dst_loss', np.mean(dst_loss) ), )
-        return ( ('src_loss', np.mean(src_loss) ), ('dst_loss', np.mean(dst_loss) ), ('D_code_loss', np.mean(D_code_loss)))
+        return ( ('src_loss', np.mean(src_loss) ), ('dst_loss', np.mean(dst_loss) ), )
+        # return ( ('src_loss', np.mean(src_loss) ), ('dst_loss', np.mean(dst_loss) ), ('D_code_loss', np.mean(D_code_loss)))
 
     def onDataOneIter(self):
         if self.get_iter() == 0 and not self.pretrain and not self.pretrain_just_disabled:

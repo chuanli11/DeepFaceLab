@@ -15,3 +15,4 @@ models/Model_Lambda/__pycache__/*
 !mainscripts/
 !mainscripts/**
 mainscripts/__pycache__/*
+*.txt
