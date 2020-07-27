@@ -20,6 +20,7 @@ class LambdaSAEHDModel(ModelBase):
 
     #override
     def on_initialize_options(self):
+        print('Model_tf1 is used - ---------------------------')
         device_config = nn.getCurrentDeviceConfig()
         if not self.config_file is None:                    
             with open(self.config_file) as file:
@@ -330,9 +331,6 @@ class LambdaSAEHDModel(ModelBase):
                 elif 'liae' in archi_type:
                     self.src_dst_trainable_weights = self.encoder.get_weights() + self.inter_AB.get_weights() + self.inter_B.get_weights() + self.decoder.get_weights()
 
-                # print(self.src_dst_trainable_weights)
-                # print(len(self.src_dst_trainable_weights))
-                # print(type(self.src_dst_trainable_weights))
                 # self.src_dst_opt = nn.RMSprop(lr=lr, lr_dropout=lr_dropout, clipnorm=clipnorm, name='src_dst_opt')
                 # self.src_dst_opt.initialize_variables (self.src_dst_trainable_weights, vars_on_cpu=optimizer_vars_on_cpu, lr_dropout_on_cpu=self.options['lr_dropout']=='cpu')
                 # self.model_filename_list += [ (self.src_dst_opt, 'src_dst_opt.npy') ]
@@ -395,7 +393,6 @@ class LambdaSAEHDModel(ModelBase):
                         gpu_target_dst      = self.target_dst [batch_slice,:,:,:]
                         gpu_target_srcm_all = self.target_srcm_all[batch_slice,:,:,:]
                         gpu_target_dstm_all = self.target_dstm_all[batch_slice,:,:,:]
-
 
                     # process model tensors
                     if 'df' in archi_type:
@@ -507,10 +504,7 @@ class LambdaSAEHDModel(ModelBase):
                     gpu_src_losses += [gpu_src_loss]
                     gpu_dst_losses += [gpu_dst_loss]
 
-                    self.src_loss = tf.reduce_mean(gpu_src_losses)
-                    self.dst_loss = tf.reduce_mean(gpu_dst_losses)
-
-                    self.G_loss = self.src_loss + self.dst_loss
+                    gpu_G_loss = gpu_src_loss + gpu_dst_loss
 
                     def DLoss(labels,logits):
                         return tf.reduce_mean( tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits), axis=[1,2,3])
@@ -526,9 +520,6 @@ class LambdaSAEHDModel(ModelBase):
 
                         self.D_code_loss = tf.reduce_mean((DLoss(gpu_src_code_d_ones , gpu_dst_code_d) + \
                                            DLoss(gpu_src_code_d_zeros, gpu_src_code_d) ) * 0.5)
-
-                    #     gpu_D_code_loss_gvs += [ [(g / loss_scaler_b, v) for g, v in nn.gradients (gpu_D_code_loss * loss_scaler_f, self.code_discriminator.get_weights() )] ]
-                    #     #gpu_D_code_loss_gvs += [ nn.gradients (gpu_D_code_loss, self.code_discriminator.get_weights() ) ]
 
                     if gan_power != 0:
                         if nn.floatx == 'float16':
@@ -553,122 +544,124 @@ class LambdaSAEHDModel(ModelBase):
                                               DLoss(gpu_pred_src_src_x2_d_zeros, gpu_pred_src_src_x2_d) ) * 0.5
 
                         if nn.floatx == 'float16':
-                            D_src_dst_loss = tf.cast(self.D_src_dst_loss, tf.float32)
-                        self.D_src_dst_loss = tf.reduce_mean(D_src_dst_loss)
-                    #     gpu_D_src_dst_loss_gvs += [[ (g / loss_scaler_b, v) for g, v in nn.gradients (gpu_D_src_dst_loss * loss_scaler_f, self.D_src.get_weights()+self.D_src_x2.get_weights() ) ]]
-                    #     #gpu_D_src_dst_loss_gvs += [ nn.gradients (gpu_D_src_dst_loss, self.D_src.get_weights()+self.D_src_x2.get_weights() ) ]
+                            D_src_dst_loss = tf.cast(D_src_dst_loss, tf.float32)
+                        
+
 
                         gan_G_loss = 0.5*gan_power*( DLoss(gpu_pred_src_src_d_ones, gpu_pred_src_src_d) + DLoss(gpu_pred_src_src_x2_d_ones, gpu_pred_src_src_x2_d))
 
                         if nn.floatx == 'float16':
                             gan_G_loss = tf.cast(gan_G_loss, tf.float32)
 
-                        self.gan_G_loss = tf.reduce_mean(gan_G_loss)
-
-                        self.G_loss += self.gan_G_loss
-
-                    # gpu_G_loss_gvs += [[ (g / loss_scaler_b, v) for g, v in nn.gradients ( gpu_G_loss * loss_scaler_f, self.src_dst_trainable_weights) ]]
-                    # #gpu_G_loss_gvs += [ nn.gradients ( gpu_G_loss, self.src_dst_trainable_weights ) ]
-                
-
-        #     # Average losses and gradients, and create optimizer update ops
-        #     with tf.device (models_opt_device):
-        #         pred_src_src  = nn.concat(gpu_pred_src_src_list, 0)
-        #         pred_dst_dst  = nn.concat(gpu_pred_dst_dst_list, 0)
-        #         pred_src_dst  = nn.concat(gpu_pred_src_dst_list, 0)
-        #         pred_src_srcm = nn.concat(gpu_pred_src_srcm_list, 0)
-        #         pred_dst_dstm = nn.concat(gpu_pred_dst_dstm_list, 0)
-        #         pred_src_dstm = nn.concat(gpu_pred_src_dstm_list, 0)
-
-        #         src_loss = tf.concat(gpu_src_losses, 0)
-        #         dst_loss = tf.concat(gpu_dst_losses, 0)
-        #         src_dst_loss_gv_op = self.src_dst_opt.get_update_op (nn.average_gv_list (gpu_G_loss_gvs))
-
-        #         if self.options['true_face_power'] != 0:
-        #             D_loss_gv_op = self.D_code_opt.get_update_op (nn.average_gv_list(gpu_D_code_loss_gvs))
-
-        #         if gan_power != 0:
-        #             src_D_src_dst_loss_gv_op = self.D_src_dst_opt.get_update_op (nn.average_gv_list(gpu_D_src_dst_loss_gvs) )
 
 
-        #     # Initializing training and view functions
-        #     def src_dst_train(warped_src, target_src, target_srcm_all, \
-        #                       warped_dst, target_dst, target_dstm_all):
-        #         s, d, _ = nn.tf_sess.run ( [ src_loss, dst_loss, src_dst_loss_gv_op],
-        #                                     feed_dict={self.warped_src :warped_src,
-        #                                                self.target_src :target_src,
-        #                                                self.target_srcm_all:target_srcm_all,
-        #                                                self.warped_dst :warped_dst,
-        #                                                self.target_dst :target_dst,
-        #                                                self.target_dstm_all:target_dstm_all,
-        #                                                })
-        #         return s, d
-        #     self.src_dst_train = src_dst_train
+            self.src_loss = tf.reduce_mean(gpu_src_losses)
+            self.dst_loss = tf.reduce_mean(gpu_dst_losses)
+            self.G_loss = self.src_loss + self.dst_loss 
 
-        #     if self.options['true_face_power'] != 0:
-        #         def D_train(warped_src, warped_dst):
-        #             nn.tf_sess.run ([D_loss_gv_op], feed_dict={self.warped_src: warped_src, self.warped_dst: warped_dst})
-        #         self.D_train = D_train
+            if gan_power != 0:
+                self.D_src_dst_loss = tf.reduce_mean(D_src_dst_loss)
+                self.gan_G_loss = tf.reduce_mean(gan_G_loss)
+                self.G_loss += self.gan_G_loss
 
-        #     if gan_power != 0:
-        #         def D_src_dst_train(warped_src, target_src, target_srcm_all, \
-        #                             warped_dst, target_dst, target_dstm_all):
-        #             nn.tf_sess.run ([src_D_src_dst_loss_gv_op], feed_dict={self.warped_src :warped_src,
-        #                                                                    self.target_src :target_src,
-        #                                                                    self.target_srcm_all:target_srcm_all,
-        #                                                                    self.warped_dst :warped_dst,
-        #                                                                    self.target_dst :target_dst,
-        #                                                                    self.target_dstm_all:target_dstm_all})
-        #         self.D_src_dst_train = D_src_dst_train
+            # Average losses and gradients, and create optimizer update ops
+            with tf.device (models_opt_device):
+                pred_src_src  = nn.concat(gpu_pred_src_src_list, 0)
+                pred_dst_dst  = nn.concat(gpu_pred_dst_dst_list, 0)
+                pred_src_dst  = nn.concat(gpu_pred_src_dst_list, 0)
+                pred_src_srcm = nn.concat(gpu_pred_src_srcm_list, 0)
+                pred_dst_dstm = nn.concat(gpu_pred_dst_dstm_list, 0)
+                pred_src_dstm = nn.concat(gpu_pred_src_dstm_list, 0)
+
+                src_loss = tf.concat(gpu_src_losses, 0)
+                dst_loss = tf.concat(gpu_dst_losses, 0)
+                # src_dst_loss_gv_op = self.src_dst_opt.get_update_op (nn.average_gv_list (gpu_G_loss_gvs))
+
+                # if self.options['true_face_power'] != 0:
+                #     D_loss_gv_op = self.D_code_opt.get_update_op (nn.average_gv_list(gpu_D_code_loss_gvs))
+
+                # if gan_power != 0:
+                #     src_D_src_dst_loss_gv_op = self.D_src_dst_opt.get_update_op (nn.average_gv_list(gpu_D_src_dst_loss_gvs) )
 
 
-        #     def AE_view(warped_src, warped_dst):
-        #         return nn.tf_sess.run ( [pred_src_src, pred_dst_dst, pred_dst_dstm, pred_src_dst, pred_src_dstm],
-        #                                     feed_dict={self.warped_src:warped_src,
-        #                                             self.warped_dst:warped_dst})
-        #     self.AE_view = AE_view
-        # else:
-        #     # Initializing merge function
-        #     with tf.device( f'/GPU:0' if len(devices) != 0 else f'/CPU:0'):
-        #         if 'df' in archi_type:
-        #             gpu_dst_code     = self.inter(self.encoder(self.warped_dst))
-        #             gpu_pred_src_dst, gpu_pred_src_dstm = self.decoder_src(gpu_dst_code)
-        #             _, gpu_pred_dst_dstm = self.decoder_dst(gpu_dst_code)
+            # # Initializing training and view functions
+            # def src_dst_train(warped_src, target_src, target_srcm_all, \
+            #                   warped_dst, target_dst, target_dstm_all):
+            #     s, d, _ = nn.tf_sess.run ( [ src_loss, dst_loss, src_dst_loss_gv_op],
+            #                                 feed_dict={self.warped_src :warped_src,
+            #                                            self.target_src :target_src,
+            #                                            self.target_srcm_all:target_srcm_all,
+            #                                            self.warped_dst :warped_dst,
+            #                                            self.target_dst :target_dst,
+            #                                            self.target_dstm_all:target_dstm_all,
+            #                                            })
+            #     return s, d
+            # self.src_dst_train = src_dst_train
 
-        #         elif 'liae' in archi_type:
-        #             gpu_dst_code = self.encoder (self.warped_dst)
-        #             gpu_dst_inter_B_code = self.inter_B (gpu_dst_code)
-        #             gpu_dst_inter_AB_code = self.inter_AB (gpu_dst_code)
-        #             gpu_dst_code = tf.concat([gpu_dst_inter_B_code,gpu_dst_inter_AB_code], nn.conv2d_ch_axis)
-        #             gpu_src_dst_code = tf.concat([gpu_dst_inter_AB_code,gpu_dst_inter_AB_code], nn.conv2d_ch_axis)
+            # if self.options['true_face_power'] != 0:
+            #     def D_train(warped_src, warped_dst):
+            #         nn.tf_sess.run ([D_loss_gv_op], feed_dict={self.warped_src: warped_src, self.warped_dst: warped_dst})
+            #     self.D_train = D_train
 
-        #             gpu_pred_src_dst, gpu_pred_src_dstm = self.decoder(gpu_src_dst_code)
-        #             _, gpu_pred_dst_dstm = self.decoder(gpu_dst_code)
+            # if gan_power != 0:
+            #     def D_src_dst_train(warped_src, target_src, target_srcm_all, \
+            #                         warped_dst, target_dst, target_dstm_all):
+            #         nn.tf_sess.run ([src_D_src_dst_loss_gv_op], feed_dict={self.warped_src :warped_src,
+            #                                                                self.target_src :target_src,
+            #                                                                self.target_srcm_all:target_srcm_all,
+            #                                                                self.warped_dst :warped_dst,
+            #                                                                self.target_dst :target_dst,
+            #                                                                self.target_dstm_all:target_dstm_all})
+            #     self.D_src_dst_train = D_src_dst_train
 
 
-        #     def AE_merge( warped_dst):
-        #         return nn.tf_sess.run ( [gpu_pred_src_dst, gpu_pred_dst_dstm, gpu_pred_src_dstm], feed_dict={self.warped_dst:warped_dst})
+            def AE_view(warped_src, warped_dst):
+                return nn.tf_sess.run ( [pred_src_src, pred_dst_dst, pred_dst_dstm, pred_src_dst, pred_src_dstm],
+                                            feed_dict={self.warped_src:warped_src,
+                                                    self.warped_dst:warped_dst})
+            self.AE_view = AE_view
+        else:
+            # Initializing merge function
+            with tf.device( f'/GPU:0' if len(devices) != 0 else f'/CPU:0'):
+                if 'df' in archi_type:
+                    gpu_dst_code     = self.inter(self.encoder(self.warped_dst))
+                    gpu_pred_src_dst, gpu_pred_src_dstm = self.decoder_src(gpu_dst_code)
+                    _, gpu_pred_dst_dstm = self.decoder_dst(gpu_dst_code)
 
-        #     self.AE_merge = AE_merge
+                elif 'liae' in archi_type:
+                    gpu_dst_code = self.encoder (self.warped_dst)
+                    gpu_dst_inter_B_code = self.inter_B (gpu_dst_code)
+                    gpu_dst_inter_AB_code = self.inter_AB (gpu_dst_code)
+                    gpu_dst_code = tf.concat([gpu_dst_inter_B_code,gpu_dst_inter_AB_code], nn.conv2d_ch_axis)
+                    gpu_src_dst_code = tf.concat([gpu_dst_inter_AB_code,gpu_dst_inter_AB_code], nn.conv2d_ch_axis)
 
-        # # Loading/initializing all models/optimizers weights
-        # for model, filename in io.progress_bar_generator(self.model_filename_list, "Initializing models"):
-        #     if self.pretrain_just_disabled:
-        #         do_init = False
-        #         if 'df' in archi_type:
-        #             if model == self.inter:
-        #                 do_init = True
-        #         elif 'liae' in archi_type:
-        #             if model == self.inter_AB or model == self.inter_B:
-        #                 do_init = True
-        #     else:
-        #         do_init = self.is_first_run()
+                    gpu_pred_src_dst, gpu_pred_src_dstm = self.decoder(gpu_src_dst_code)
+                    _, gpu_pred_dst_dstm = self.decoder(gpu_dst_code)
 
-        #     if not do_init:
-        #         do_init = not model.load_weights( self.get_strpath_storage_for_file(filename) )
 
-        #     if do_init:
-        #         model.init_weights()
+            def AE_merge( warped_dst):
+                return nn.tf_sess.run ( [gpu_pred_src_dst, gpu_pred_dst_dstm, gpu_pred_src_dstm], feed_dict={self.warped_dst:warped_dst})
+
+            self.AE_merge = AE_merge
+
+        # Loading/initializing all models/optimizers weights
+        for model, filename in io.progress_bar_generator(self.model_filename_list, "Initializing models"):
+            if self.pretrain_just_disabled:
+                do_init = False
+                if 'df' in archi_type:
+                    if model == self.inter:
+                        do_init = True
+                elif 'liae' in archi_type:
+                    if model == self.inter_AB or model == self.inter_B:
+                        do_init = True
+            else:
+                do_init = self.is_first_run()
+
+            if not do_init:
+                do_init = not model.load_weights( self.get_strpath_storage_for_file(filename) )
+
+            if do_init:
+                model.init_weights()
 
         # initializing sample generators
         if self.is_training:
@@ -703,12 +696,15 @@ class LambdaSAEHDModel(ModelBase):
                         generators_count=dst_generators_count )
                              ])
 
-        #     self.last_src_samples_loss = []
-        #     self.last_dst_samples_loss = []
+            self.last_src_samples_loss = []
+            self.last_dst_samples_loss = []
 
-        #     if self.pretrain_just_disabled:
-        #         self.update_sample_for_preview(force_new=True)
+            if self.pretrain_just_disabled:
+                self.update_sample_for_preview(force_new=True)
 
+            ( (self.fix_warped_src, self.fix_target_src, self.fix_target_srcm_all), \
+              (self.fix_warped_dst, self.fix_target_dst, self.fix_target_dstm_all) ) = self.generate_next_samples()
+            
     #override
     def get_model_filename_list(self):
         return self.model_filename_list
@@ -719,51 +715,58 @@ class LambdaSAEHDModel(ModelBase):
             model.save_weights ( self.get_strpath_storage_for_file(filename) )
 
 
-    #override
-    # def onTrainOneIter(self):
-    #     if self.get_iter() == 0 and not self.pretrain and not self.pretrain_just_disabled:
-    #         io.log_info('You are training the model from scratch. It is strongly recommended to use a pretrained model to speed up the training and improve the quality.\n')
+    # override
+    def onTrainOneIter(self):
+        if self.get_iter() == 0 and not self.pretrain and not self.pretrain_just_disabled:
+            io.log_info('You are training the model from scratch. It is strongly recommended to use a pretrained model to speed up the training and improve the quality.\n')
 
-    #     bs = self.get_batch_size()
+        bs = self.get_batch_size()
 
-    #     if self.options['use_syn'] and self.options['use_benchmark']:
-    #         warped_src = self.syn_warped_src
-    #         target_src = self.syn_target_src
-    #         target_srcm_all = self.syn_target_srcm_all
-    #         warped_dst = self.syn_warped_dst
-    #         target_dst = self.syn_target_dst
-    #         target_dstm_all = self.syn_target_dstm_all         
-    #     else:
-    #         ( (warped_src, target_src, target_srcm_all), \
-    #           (warped_dst, target_dst, target_dstm_all) ) = self.generate_next_samples()
+        if self.options['use_syn'] and self.options['use_benchmark']:
+            warped_src = self.syn_warped_src
+            target_src = self.syn_target_src
+            target_srcm_all = self.syn_target_srcm_all
+            warped_dst = self.syn_warped_dst
+            target_dst = self.syn_target_dst
+            target_dstm_all = self.syn_target_dstm_all         
+        else:
+            # ( (warped_src, target_src, target_srcm_all), \
+            #   (warped_dst, target_dst, target_dstm_all) ) = self.generate_next_samples()
 
-    #     src_loss, dst_loss = self.src_dst_train (warped_src, target_src, target_srcm_all, warped_dst, target_dst, target_dstm_all)
+            warped_src = self.fix_warped_src
+            target_src = self.fix_target_src
+            target_srcm_all = self.fix_target_srcm_all
+            warped_dst = self.fix_warped_dst
+            target_dst = self.fix_target_dst
+            target_dstm_all = self.fix_target_dstm_all   
+            
+        src_loss, dst_loss = self.src_dst_train (warped_src, target_src, target_srcm_all, warped_dst, target_dst, target_dstm_all)
 
-    #     for i in range(bs):
-    #         self.last_src_samples_loss.append (  (target_src[i], target_srcm_all[i], src_loss[i] )  )
-    #         self.last_dst_samples_loss.append (  (target_dst[i], target_dstm_all[i], dst_loss[i] )  )
+        for i in range(bs):
+            self.last_src_samples_loss.append (  (target_src[i], target_srcm_all[i], src_loss[i] )  )
+            self.last_dst_samples_loss.append (  (target_dst[i], target_dstm_all[i], dst_loss[i] )  )
 
-    #     if len(self.last_src_samples_loss) >= bs*16:
-    #         src_samples_loss = sorted(self.last_src_samples_loss, key=operator.itemgetter(2), reverse=True)
-    #         dst_samples_loss = sorted(self.last_dst_samples_loss, key=operator.itemgetter(2), reverse=True)
+        if len(self.last_src_samples_loss) >= bs*16:
+            src_samples_loss = sorted(self.last_src_samples_loss, key=operator.itemgetter(2), reverse=True)
+            dst_samples_loss = sorted(self.last_dst_samples_loss, key=operator.itemgetter(2), reverse=True)
 
-    #         target_src      = np.stack( [ x[0] for x in src_samples_loss[:bs] ] )
-    #         target_srcm_all = np.stack( [ x[1] for x in src_samples_loss[:bs] ] )
+            target_src      = np.stack( [ x[0] for x in src_samples_loss[:bs] ] )
+            target_srcm_all = np.stack( [ x[1] for x in src_samples_loss[:bs] ] )
 
-    #         target_dst      = np.stack( [ x[0] for x in dst_samples_loss[:bs] ] )
-    #         target_dstm_all = np.stack( [ x[1] for x in dst_samples_loss[:bs] ] )
+            target_dst      = np.stack( [ x[0] for x in dst_samples_loss[:bs] ] )
+            target_dstm_all = np.stack( [ x[1] for x in dst_samples_loss[:bs] ] )
 
-    #         src_loss, dst_loss = self.src_dst_train (target_src, target_src, target_srcm_all, target_dst, target_dst, target_dstm_all)
-    #         self.last_src_samples_loss = []
-    #         self.last_dst_samples_loss = []
+            src_loss, dst_loss = self.src_dst_train (target_src, target_src, target_srcm_all, target_dst, target_dst, target_dstm_all)
+            self.last_src_samples_loss = []
+            self.last_dst_samples_loss = []
 
-    #     if self.options['true_face_power'] != 0 and not self.pretrain:
-    #         self.D_train (warped_src, warped_dst)
+        if self.options['true_face_power'] != 0 and not self.pretrain:
+            self.D_train (warped_src, warped_dst)
 
-    #     if self.gan_power != 0:
-    #         self.D_src_dst_train (warped_src, target_src, target_srcm_all, warped_dst, target_dst, target_dstm_all)
+        if self.gan_power != 0:
+            self.D_src_dst_train (warped_src, target_src, target_srcm_all, warped_dst, target_dst, target_dstm_all)
 
-    #     return ( ('src_loss', np.mean(src_loss) ), ('dst_loss', np.mean(dst_loss) ), )
+        return ( ('src_loss', np.mean(src_loss) ), ('dst_loss', np.mean(dst_loss) ), )
 
 
     # def onDataOneIter(self):

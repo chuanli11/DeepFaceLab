@@ -1,0 +1,19 @@
+Running trainer.
+
+
+Model first run.
+Error: "opt" must be an instance of a tf.train.Optimizer or a tf.keras.optimizers.Optimizer, but got: <core.leras.optimizers.RMSprop.RMSprop object at 0x7f5354047b38>
+Traceback (most recent call last):
+  File "/home/ubuntu/DeepFaceLab_chuanli11/mainscripts/Trainer.py", line 68, in trainerThread
+    use_amp=use_amp
+  File "/home/ubuntu/DeepFaceLab_chuanli11/models/ModelBase.py", line 197, in __init__
+    self.on_initialize()
+  File "/home/ubuntu/DeepFaceLab_chuanli11/models/Model_LambdaSAEHD/Model.py", line 336, in on_initialize
+    self.src_dst_opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(self.src_dst_opt)
+  File "/home/ubuntu/DeepFaceLab_chuanli11/venv-tf-1.15.3/lib/python3.6/site-packages/tensorflow_core/python/training/experimental/mixed_precision.py", line 330, in enable_mixed_precision_graph_rewrite_v1
+    use_v1_behavior=True)
+  File "/home/ubuntu/DeepFaceLab_chuanli11/venv-tf-1.15.3/lib/python3.6/site-packages/tensorflow_core/python/training/experimental/mixed_precision.py", line 358, in _enable_mixed_precision_graph_rewrite_base
+    opt = _wrap_optimizer(opt, loss_scale, use_v1_behavior=use_v1_behavior)
+  File "/home/ubuntu/DeepFaceLab_chuanli11/venv-tf-1.15.3/lib/python3.6/site-packages/tensorflow_core/python/training/experimental/mixed_precision.py", line 72, in _wrap_optimizer
+    'tf.keras.optimizers.Optimizer, but got: %s' % opt)
+ValueError: "opt" must be an instance of a tf.train.Optimizer or a tf.keras.optimizers.Optimizer, but got: <core.leras.optimizers.RMSprop.RMSprop object at 0x7f5354047b38>

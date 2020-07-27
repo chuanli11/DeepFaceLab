@@ -71,9 +71,19 @@ def trainerThread (s2c, c2s, e,
                         )
             
             # print(model.src_dst_trainable_weights)
+            # print(len(model.src_dst_trainable_weights))
+            # print('----------------------------------------')
+
+            # tf = nn.tf
+            # print(tf.trainable_variables())
+            # print(len(tf.trainable_variables()))
             # print(len(model.D_code_trainable_weights))
             # print(len(model.D_src_dst_trainable_weights))
+            # print(model.G_loss)
 
+            # print(model.D_code_loss)
+
+            # print(model.D_src_dst_loss)
             # sys.exit()
 
             is_reached_goal = model.is_reached_iter_goal()
@@ -92,12 +102,12 @@ def trainerThread (s2c, c2s, e,
                     model.create_backup()             
 
             def send_preview():
-                # if not debug:
-                #     previews = model.get_previews()
-                #     c2s.put ( {'op':'show', 'previews': previews, 'iter':model.get_iter(), 'loss_history': model.get_loss_history().copy() } )
-                # else:
-                #     previews = [( 'debug, press update for new', model.debug_one_iter())]
-                #     c2s.put ( {'op':'show', 'previews': previews} )
+                if not debug:
+                    previews = model.get_previews()
+                    c2s.put ( {'op':'show', 'previews': previews, 'iter':model.get_iter(), 'loss_history': model.get_loss_history().copy() } )
+                else:
+                    previews = [( 'debug, press update for new', model.debug_one_iter())]
+                    c2s.put ( {'op':'show', 'previews': previews} )
                 e.set() #Set the GUI Thread as Ready
 
             if model.get_target_iter() != 0:
@@ -113,22 +123,42 @@ def trainerThread (s2c, c2s, e,
             execute_programs = [ [x[0], x[1], time.time() ] for x in execute_programs ]
 
             tf = nn.tf
-            optimizer = tf.train.AdamOptimizer(learning_rate=1E-3)
+            optimizer_G = tf.train.AdamOptimizer(learning_rate=0.001, beta1=0.9, beta2=0.999)
             global_step = tf.train.get_or_create_global_step()
 
+            if use_amp:
+                loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
+                optimizer_G = tf.train.experimental.enable_mixed_precision_graph_rewrite(optimizer_G, loss_scale=loss_scale)
+
             # Auto-encoder loss
-            src_dst_update_op = optimizer.minimize(model.G_loss, global_step=global_step, var_list=model.src_dst_trainable_weights)
+            src_dst_update_op = optimizer_G.minimize(model.G_loss, global_step=global_step, var_list=model.src_dst_trainable_weights)
 
-            # True face loss
-            if model.options['true_face_power'] != 0:
-                D_code_update_op  = optimizer.minimize(model.D_code_loss, global_step=global_step, var_list=model.D_code_trainable_weights)
+            # # True face loss
+            # if model.options['true_face_power'] != 0:
+            #     D_code_update_op  = optimizer.minimize(model.D_code_loss, global_step=global_step, var_list=model.D_code_trainable_weights)
 
-            # GAN loss
+            list_globals_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
+            print('initializing variables ... ')
+            if use_amp:
+                list_init = []
+                for x in [n for n in list_globals_vars]:
+                    if 'Adam' in x.name or 'beta' in x.name or 'loss_scale' in x.name or 'good_steps' in x.name:
+                        list_init.append(x)
+                nn.tf_sess.run(tf.variables_initializer(list_init))
+            else:
+                nn.tf_sess.run(tf.variables_initializer(optimizer_G.variables()))
+            
+            print('done ')
+
+            nn.tf_sess.run(global_step.initializer)
+
             if model.options['gan_power'] != 0:
-                D_src_dst_update_op = optimizer.minimize(model.D_src_dst_loss, global_step=global_step, var_list=model.D_src_dst_trainable_weights)
+                optimizer_D_src_dst = tf.train.RMSPropOptimizer(learning_rate=5e-5)
+                D_src_dst_update_op = optimizer_D_src_dst.minimize(model.D_src_dst_loss, global_step=global_step, var_list=model.D_src_dst_trainable_weights)
+                nn.tf_sess.run(tf.variables_initializer(optimizer_D_src_dst.variables()))
 
-
-            nn.tf_sess.run(tf.global_variables_initializer())
+            # ( (warped_src, target_src, target_srcm_all), \
+            #   (warped_dst, target_dst, target_dstm_all) ) = model.generate_next_samples()
 
             for i in itertools.count(0,1):
                 if not debug:
@@ -161,6 +191,8 @@ def trainerThread (s2c, c2s, e,
                         ( (warped_src, target_src, target_srcm_all), \
                           (warped_dst, target_dst, target_dstm_all) ) = model.generate_next_samples()
 
+                        list_loss = []
+
                         # Train auto-encoder
                         _, src_loss, dst_loss = nn.tf_sess.run([src_dst_update_op, model.src_loss, model.dst_loss], feed_dict={
                             model.warped_src :warped_src,
@@ -171,6 +203,18 @@ def trainerThread (s2c, c2s, e,
                             model.target_dstm_all:target_dstm_all})
                         list_loss = [float(src_loss), float(dst_loss)]
 
+                        # src_loss, dst_loss = nn.tf_sess.run([model.src_loss, model.dst_loss], feed_dict={
+                        #     model.warped_src :warped_src,
+                        #     model.target_src :target_src,
+                        #     model.target_srcm_all:target_srcm_all,
+                        #     model.warped_dst :warped_dst,
+                        #     model.target_dst :target_dst,
+                        #     model.target_dstm_all:target_dstm_all})
+                        # print(src_loss)
+                        # print(dst_loss)
+                        # list_loss = []
+                        # list_loss = [np.mean(float(src_loss)), np.mean(float(dst_loss))]
+
                         # # Train face style
                         if model.options['true_face_power'] != 0:
                             # D_code_loss = nn.tf_sess.run(model.D_code_loss, feed_dict={
@@ -180,13 +224,14 @@ def trainerThread (s2c, c2s, e,
                             # model.warped_src :warped_src,
                             # model.warped_dst :warped_dst})
 
-                            _, D_code_loss = nn.tf_sess.run([D_code_update_op, model.D_code_loss], feed_dict={
+                            _, D_code_loss, _gpu_dst_code_d = nn.tf_sess.run([D_code_update_op, model.D_code_loss, model.gpu_dst_code_d], feed_dict={
                                 model.warped_src :warped_src,
                                 model.target_src :target_src,
                                 model.target_srcm_all:target_srcm_all,
                                 model.warped_dst :warped_dst,
                                 model.target_dst :target_dst,
                                 model.target_dstm_all:target_dstm_all})
+                            print(_gpu_dst_code_d)
                             list_loss.append(float(D_code_loss))
 
                         # Train GAN
@@ -199,7 +244,6 @@ def trainerThread (s2c, c2s, e,
                                 model.target_dst :target_dst,
                                 model.target_dstm_all:target_dstm_all})
                             list_loss.append(float(D_src_dst_loss))
-                            # print(D_src_dst_loss)                         
 
 
                         model.loss_history.append ( list_loss )
@@ -280,6 +324,8 @@ def trainerThread (s2c, c2s, e,
 
             model.finalize()
 
+
+
         except Exception as e:
             print ('Error: %s' % (str(e)))
             traceback.print_exc()
@@ -288,7 +334,7 @@ def trainerThread (s2c, c2s, e,
 
 
 def main(**kwargs):
-    io.log_info ("Running trainer.\r\n")
+    io.log_info ("Running trainer TF1.\r\n")
 
     no_preview = kwargs.get('no_preview', False)
 

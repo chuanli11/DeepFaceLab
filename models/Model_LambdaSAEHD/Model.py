@@ -693,6 +693,9 @@ class LambdaSAEHDModel(ModelBase):
             if self.pretrain_just_disabled:
                 self.update_sample_for_preview(force_new=True)
 
+            ( (self.fix_warped_src, self.fix_target_src, self.fix_target_srcm_all), \
+              (self.fix_warped_dst, self.fix_target_dst, self.fix_target_dstm_all) ) = self.generate_next_samples()
+            
     #override
     def get_model_filename_list(self):
         return self.model_filename_list
@@ -720,6 +723,12 @@ class LambdaSAEHDModel(ModelBase):
         else:
             ( (warped_src, target_src, target_srcm_all), \
               (warped_dst, target_dst, target_dstm_all) ) = self.generate_next_samples()
+            # warped_src = self.fix_warped_src
+            # target_src = self.fix_target_src
+            # target_srcm_all = self.fix_target_srcm_all
+            # warped_dst = self.fix_warped_dst
+            # target_dst = self.fix_target_dst
+            # target_dstm_all = self.fix_target_dstm_all   
 
         src_loss, dst_loss = self.src_dst_train (warped_src, target_src, target_srcm_all, warped_dst, target_dst, target_dstm_all)
 
