@@ -2,12 +2,12 @@ import os
 import glob
 import pandas as pd
 
-#list_gpu_type = ['QuadroRTX8000']
-list_gpu_type = ['TeslaV100-SXM3-32GB']
-path_config = 'benchmark/log_xla'
-output_file = 'benchmark/benchmark_xla_fp32_vs_amp.csv'
+list_gpu_type = ['QuadroRTX8000']
+#list_gpu_type = ['TeslaV100-SXM3-32GB']
+path_config = 'benchmark/log_tweek'
+output_file = 'benchmark/benchmark_fp32_vs_amp.csv'
 list_config = [
-'LambdaSAEHD_th_liae_ud_3_416_288_168_120' \
+'LambdaSAEHD_liae_gan_128_128_64_64', 'LambdaSAEHD_liae_gan_128_128_64_64_syn', 'LambdaSAEHD_th_liae_ud_3_416_288_168_120', 'LambdaSAEHD_th_liae_ud_3_416_288_168_120_syn' \
 ]
 list_gpu_idxs = ['0']
 
