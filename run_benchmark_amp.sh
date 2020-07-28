@@ -1,8 +1,8 @@
 #!/bin/bash
-CONFIG=${1:-LambdaSAEHD_mini}
-NUM_STEPS=${2:-50}
-BS_PER_GPU_FP32=${3:-32}
-BS_PER_GPU_AMP=${4:-64}
+CONFIG=${1:-LambdaSAEHD_cl_liae_ud_gan_3_416_256_128_128_32}
+NUM_STEPS=${2:-400}
+BS_PER_GPU_FP32=${3:-8}
+BS_PER_GPU_AMP=${4:-16}
 LOG_PATH=${5:-log_20200717}
 SRC_PATH=${6:-~/data/dfl/Gordon_face_small}
 DST_PATH=${7:-~/data/dfl/Snowden_face_small}

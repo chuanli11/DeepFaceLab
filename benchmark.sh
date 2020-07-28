@@ -41,8 +41,8 @@ for idx in $GPU_IDXS; do
         --training-data-src-dir=${TRAINING_DATA_SRC_DIR} \
         --training-data-dst-dir=${TRAINING_DATA_DST_DIR} \
         --model-dir ${MODEL_DIR} \
-        --model ${MODEL} \
         --no-preview \
+        --model ${MODEL} \
         --force-gpu-idxs ${idx} \
         --force-model-name ${MODEL_NAME} \
         --config-file benchmark/config/${config}.yaml \
