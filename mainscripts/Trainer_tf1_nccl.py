@@ -53,7 +53,7 @@ def trainerThread (s2c, c2s, e,
                 saved_models_path.mkdir(exist_ok=True, parents=True)
 
 
-            model = models.import_model_tf1_multi(model_class_name)(
+            model = models.import_model_tf1_nccl(model_class_name)(
                         is_training=True,
                         saved_models_path=saved_models_path,
                         training_data_src_path=training_data_src_path,
@@ -347,7 +347,7 @@ def trainerThread (s2c, c2s, e,
 
 
 def main(**kwargs):
-    io.log_info ("Running trainer TF1 MultiGPU.\r\n")
+    io.log_info ("Running trainer TF1 NCCL.\r\n")
 
     no_preview = kwargs.get('no_preview', False)
 

@@ -17,7 +17,7 @@ d_mask_dims: 32
 eyes_prio: False
 lr_dropout: False
 random_warp: False
-gan_power: 1.0
+gan_power: 0.0
 true_face_power: 0.0
 face_style_power: 0.0
 bg_style_power: 0.0
