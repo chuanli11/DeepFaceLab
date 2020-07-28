@@ -113,42 +113,36 @@ def trainerThread (s2c, c2s, e,
             global_step = tf.train.get_or_create_global_step()
             nn.tf_sess.run(global_step.initializer)
 
-            # Auto-encoder
-            optimizer_G = tf.train.AdamOptimizer(learning_rate=0.0001, beta1=0.9, beta2=0.999)
-            if use_amp:
-                loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
-                optimizer_G = tf.train.experimental.enable_mixed_precision_graph_rewrite(optimizer_G, loss_scale=loss_scale)
+            # # Auto-encoder
+            # optimizer_G = tf.train.AdamOptimizer(learning_rate=0.0001, beta1=0.9, beta2=0.999)
+            # if use_amp:
+            #     loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
+            #     optimizer_G = tf.train.experimental.enable_mixed_precision_graph_rewrite(optimizer_G, loss_scale=loss_scale)
 
             
-            src_dst_update_op = optimizer_G.minimize(model.G_loss, global_step=global_step, var_list=model.src_dst_trainable_weights)
+            # src_dst_update_op = optimizer_G.minimize(model.G_loss, global_step=global_step, var_list=model.src_dst_trainable_weights)
 
             # True face 
             # if model.options['true_face_power'] != 0:
             #     D_code_update_op  = optimizer.minimize(model.D_code_loss, global_step=global_step, var_list=model.D_code_trainable_weights)
 
-            # GAN
-            if model.options['gan_power'] != 0:
-                optimizer_D_src_dst = tf.train.AdamOptimizer(learning_rate=0.0001, beta1=0.9, beta2=0.999)
-                if use_amp:
-                    loss_scale_D_src_dst = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
-                    optimizer_D_src_dst = tf.train.experimental.enable_mixed_precision_graph_rewrite(optimizer_D_src_dst, loss_scale=loss_scale_D_src_dst)
+            # # GAN
+            # if model.options['gan_power'] != 0:
+            #     optimizer_D_src_dst = tf.train.AdamOptimizer(learning_rate=0.0001, beta1=0.9, beta2=0.999)
+            #     if use_amp:
+            #         loss_scale_D_src_dst = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
+            #         optimizer_D_src_dst = tf.train.experimental.enable_mixed_precision_graph_rewrite(optimizer_D_src_dst, loss_scale=loss_scale_D_src_dst)
 
-                D_src_dst_update_op = optimizer_D_src_dst.minimize(model.D_src_dst_loss, global_step=global_step, var_list=model.D_src_dst_trainable_weights)
+            #     D_src_dst_update_op = optimizer_D_src_dst.minimize(model.D_src_dst_loss, global_step=global_step, var_list=model.D_src_dst_trainable_weights)
                 
             list_globals_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
             print('initializing variables ... ')
-            if use_amp:
-                list_init = []
-                for x in [n for n in list_globals_vars]:
-                    if 'Adam' in x.name or 'beta' in x.name or 'loss_scale' in x.name or 'good_steps' in x.name:
-                        if not nn.tf_sess.run(nn.tf.is_variable_initialized(x)):
-                            list_init.append(x)
-                nn.tf_sess.run(tf.variables_initializer(list_init))
-            else:
-                nn.tf_sess.run(tf.variables_initializer(optimizer_G.variables()))
-                if model.options['gan_power'] != 0:
-                    nn.tf_sess.run(tf.variables_initializer(optimizer_D_src_dst.variables()))
-            
+            list_init = []
+            for x in [n for n in list_globals_vars]:
+                if 'Adam' in x.name or 'beta' in x.name or 'loss_scale' in x.name or 'good_steps' in x.name:
+                    if not nn.tf_sess.run(nn.tf.is_variable_initialized(x)):
+                        list_init.append(x)
+            nn.tf_sess.run(tf.variables_initializer(list_init))
             print('done ')
 
             # ( (warped_src, target_src, target_srcm_all), \
@@ -188,7 +182,7 @@ def trainerThread (s2c, c2s, e,
                         list_loss = []
 
                         # Train auto-encoder
-                        _, src_loss, dst_loss = nn.tf_sess.run([src_dst_update_op, model.src_loss, model.dst_loss], feed_dict={
+                        _, src_loss, dst_loss = nn.tf_sess.run([model.G_train_op, model.src_loss, model.dst_loss], feed_dict={
                             model.warped_src :warped_src,
                             model.target_src :target_src,
                             model.target_srcm_all:target_srcm_all,
@@ -230,7 +224,7 @@ def trainerThread (s2c, c2s, e,
 
                         # Train GAN
                         if model.options['gan_power'] != 0:
-                            _, D_src_dst_loss = nn.tf_sess.run([D_src_dst_update_op, model.D_src_dst_loss], feed_dict={
+                            _, D_src_dst_loss = nn.tf_sess.run([model.D_src_dst_train_op, model.D_src_dst_loss], feed_dict={
                                 model.warped_src :warped_src,
                                 model.target_src :target_src,
                                 model.target_srcm_all:target_srcm_all,

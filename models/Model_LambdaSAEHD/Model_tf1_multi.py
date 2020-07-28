@@ -14,13 +14,11 @@ from samplelib import *
 
 
 
-
-
 class LambdaSAEHDModel(ModelBase):
 
     #override
     def on_initialize_options(self):
-        print('Model_tf1_multi is used - ---------------------------')
+        print('Model_tf1_multi is used ---------------------------')
         device_config = nn.getCurrentDeviceConfig()
         if not self.config_file is None:                    
             with open(self.config_file) as file:
@@ -222,6 +220,31 @@ class LambdaSAEHDModel(ModelBase):
         nn.initialize(floatx=self.options['precision'], data_format=self.model_data_format, use_amp=self.use_amp)
         tf = nn.tf
 
+        def average_gradients(tower_grads):
+            average_grads = []
+            for grad_and_vars in zip(*tower_grads):
+                # Note that each grad_and_vars looks like the following:
+                #   ((grad0_gpu0, var0_gpu0), ... , (grad0_gpuN, var0_gpuN))
+                grads = []
+                for g, _ in grad_and_vars:
+                    # Add 0 dimension to the gradients to represent the tower.
+                    expanded_g = tf.expand_dims(g, 0)
+
+                    # Append on a 'tower' dimension which we will average over below.
+                    grads.append(expanded_g)
+
+                # Average over the 'tower' dimension.
+                grad = tf.concat(grads, 0)
+                grad = tf.reduce_mean(grad, 0)
+
+                # Keep in mind that the Variables are redundant because they are shared
+                # across towers. So .. we will just return the first tower's pointer to
+                # the Variable.
+                v = grad_and_vars[0][1]
+                grad_and_var = (grad, v)
+                average_grads.append(grad_and_var)
+            return average_grads
+
         self.resolution = resolution = self.options['resolution']
         self.face_type = {'h'  : FaceType.HALF,
                           'mf' : FaceType.MID_FULL,
@@ -322,7 +345,7 @@ class LambdaSAEHDModel(ModelBase):
                     self.model_filename_list += [ [self.D_src_x2, 'D_src_x2.npy'] ]
 
                 # Initialize optimizers
-                lr=5e-5
+                lr=1e-4
                 lr_dropout = 0.3 if self.options['lr_dropout'] in ['y','cpu'] and not self.pretrain else 1.0
                 clipnorm = 1.0 if self.options['clipgrad'] else 0.0
 
@@ -330,10 +353,11 @@ class LambdaSAEHDModel(ModelBase):
                     self.src_dst_trainable_weights = self.encoder.get_weights() + self.inter.get_weights() + self.decoder_src.get_weights() + self.decoder_dst.get_weights()
                 elif 'liae' in archi_type:
                     self.src_dst_trainable_weights = self.encoder.get_weights() + self.inter_AB.get_weights() + self.inter_B.get_weights() + self.decoder.get_weights()
-
-                # self.src_dst_opt = nn.RMSprop(lr=lr, lr_dropout=lr_dropout, clipnorm=clipnorm, name='src_dst_opt')
-                # self.src_dst_opt.initialize_variables (self.src_dst_trainable_weights, vars_on_cpu=optimizer_vars_on_cpu, lr_dropout_on_cpu=self.options['lr_dropout']=='cpu')
-                # self.model_filename_list += [ (self.src_dst_opt, 'src_dst_opt.npy') ]
+                
+                self.src_dst_opt = tf.train.AdamOptimizer(learning_rate=lr, beta1=0.9, beta2=0.999)
+                if self.use_amp:
+                    src_dst_loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
+                    self.src_dst_opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(self.src_dst_opt, loss_scale=src_dst_loss_scale)
 
                 if self.options['true_face_power'] != 0:
                     self.D_code_trainable_weights = self.code_discriminator.get_weights()
@@ -345,12 +369,10 @@ class LambdaSAEHDModel(ModelBase):
 
                 if gan_power != 0:
                     self.D_src_dst_trainable_weights = self.D_src.get_weights()+self.D_src_x2.get_weights()
-                    # print(self.gan_trainable_weights)
-                    # print(len(self.gan_trainable_weights))
-
-                    # self.D_src_dst_opt = nn.RMSprop(lr=lr, lr_dropout=lr_dropout, clipnorm=clipnorm, name='D_src_dst_opt')
-                    # self.D_src_dst_opt.initialize_variables ( self.D_src.get_weights()+self.D_src_x2.get_weights(), vars_on_cpu=optimizer_vars_on_cpu, lr_dropout_on_cpu=self.options['lr_dropout']=='cpu')
-                    # self.model_filename_list += [ (self.D_src_dst_opt, 'D_src_dst_opt.npy') ]
+                    self.D_src_dst_opt = tf.train.AdamOptimizer(learning_rate=lr, beta1=0.9, beta2=0.999)
+                    if self.use_amp:
+                        D_src_dst_loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
+                        self.D_src_dst_opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(self.D_src_dst_opt, loss_scale=D_src_dst_loss_scale)                    
 
         if self.is_training:
             # Adjust batch size for multiple GPU
@@ -377,6 +399,7 @@ class LambdaSAEHDModel(ModelBase):
 
             gpu_src_losses = []
             gpu_dst_losses = []
+            gpu_D_src_dst_losses = []
             gpu_G_loss_gvs = []
             gpu_D_code_loss_gvs = []
             gpu_D_src_dst_loss_gvs = []
@@ -454,6 +477,7 @@ class LambdaSAEHDModel(ModelBase):
                     gpu_psd_target_dst_masked = gpu_pred_src_dst*gpu_target_dstm_blur
                     gpu_psd_target_dst_anti_masked = gpu_pred_src_dst*(1.0 - gpu_target_dstm_blur)
 
+                    # src -----------------------------------------
                     if resolution < 256:
                         gpu_src_loss =  tf.reduce_mean ( 10*nn.dssim(gpu_target_src_masked_opt, gpu_pred_src_src_masked_opt, max_val=1.0, filter_size=int(resolution/11.6)), axis=[1])
                     else:
@@ -478,6 +502,7 @@ class LambdaSAEHDModel(ModelBase):
                         gpu_src_loss += tf.reduce_mean( (10*bg_style_power)*nn.dssim(gpu_psd_target_dst_anti_masked, gpu_target_dst_anti_masked, max_val=1.0, filter_size=int(resolution/11.6)), axis=[1])
                         gpu_src_loss += tf.reduce_mean( (10*bg_style_power)*tf.square( gpu_psd_target_dst_anti_masked - gpu_target_dst_anti_masked), axis=[1,2,3] )
 
+                    # dst -----------------------------------------
                     if resolution < 256:
                         if nn.floatx == 'float16':
                             gpu_target_dst_masked_opt = tf.cast(gpu_target_dst_masked_opt, tf.float32)
@@ -491,8 +516,6 @@ class LambdaSAEHDModel(ModelBase):
                         gpu_dst_loss += tf.reduce_mean ( 5*nn.dssim(gpu_target_dst_masked_opt, gpu_pred_dst_dst_masked_opt, max_val=1.0, filter_size=int(resolution/23.2) ), axis=[1])
                     gpu_dst_loss += tf.reduce_mean ( 10*tf.square(  gpu_target_dst_masked_opt- gpu_pred_dst_dst_masked_opt ), axis=[1,2,3])
 
-
-
                     if eyes_prio:
                         gpu_dst_loss += tf.reduce_mean ( 300*tf.abs ( gpu_target_dst*gpu_target_dstm_eyes - gpu_pred_dst_dst*gpu_target_dstm_eyes ), axis=[1,2,3])
 
@@ -501,25 +524,26 @@ class LambdaSAEHDModel(ModelBase):
                         gpu_pred_dst_dstm = tf.cast(gpu_pred_dst_dstm, tf.float32)
                     gpu_dst_loss += tf.reduce_mean ( 10*tf.square( gpu_target_dstm - gpu_pred_dst_dstm ),axis=[1,2,3] )
 
+                    # append to list -----------------------------------------
                     gpu_src_losses += [gpu_src_loss]
                     gpu_dst_losses += [gpu_dst_loss]
 
-                    gpu_G_loss = gpu_src_loss + gpu_dst_loss
+                    # gpu_G_loss = gpu_src_loss + gpu_dst_loss
 
                     def DLoss(labels,logits):
                         return tf.reduce_mean( tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits), axis=[1,2,3])
 
-                    if self.options['true_face_power'] != 0:
-                        gpu_src_code_d = self.code_discriminator( gpu_src_code )
-                        gpu_src_code_d_ones  = tf.ones_like (gpu_src_code_d)
-                        gpu_src_code_d_zeros = tf.zeros_like(gpu_src_code_d)
-                        gpu_dst_code_d = self.code_discriminator( gpu_dst_code )
-                        gpu_dst_code_d_ones = tf.ones_like(gpu_dst_code_d)
+                    # if self.options['true_face_power'] != 0:
+                    #     gpu_src_code_d = self.code_discriminator( gpu_src_code )
+                    #     gpu_src_code_d_ones  = tf.ones_like (gpu_src_code_d)
+                    #     gpu_src_code_d_zeros = tf.zeros_like(gpu_src_code_d)
+                    #     gpu_dst_code_d = self.code_discriminator( gpu_dst_code )
+                    #     gpu_dst_code_d_ones = tf.ones_like(gpu_dst_code_d)
 
-                        self.G_loss += tf.reduce_mean(self.options['true_face_power']*DLoss(gpu_src_code_d_ones, gpu_src_code_d))
+                    #     self.G_loss += tf.reduce_mean(self.options['true_face_power']*DLoss(gpu_src_code_d_ones, gpu_src_code_d))
 
-                        self.D_code_loss = tf.reduce_mean((DLoss(gpu_src_code_d_ones , gpu_dst_code_d) + \
-                                           DLoss(gpu_src_code_d_zeros, gpu_src_code_d) ) * 0.5)
+                    #     self.D_code_loss = tf.reduce_mean((DLoss(gpu_src_code_d_ones , gpu_dst_code_d) + \
+                    #                        DLoss(gpu_src_code_d_zeros, gpu_src_code_d) ) * 0.5)
 
                     if gan_power != 0:
                         if nn.floatx == 'float16':
@@ -538,15 +562,18 @@ class LambdaSAEHDModel(ModelBase):
                         gpu_target_src_x2_d_ones    = tf.ones_like(gpu_target_src_x2_d)
 
 
-                        D_src_dst_loss = (DLoss(gpu_target_src_d_ones      , gpu_target_src_d) + \
+                        gpu_D_src_dst_loss = (DLoss(gpu_target_src_d_ones      , gpu_target_src_d) + \
                                               DLoss(gpu_pred_src_src_d_zeros   , gpu_pred_src_src_d) ) * 0.5 + \
                                              (DLoss(gpu_target_src_x2_d_ones   , gpu_target_src_x2_d) + \
                                               DLoss(gpu_pred_src_src_x2_d_zeros, gpu_pred_src_src_x2_d) ) * 0.5
 
                         if nn.floatx == 'float16':
-                            D_src_dst_loss = tf.cast(D_src_dst_loss, tf.float32)
+                            gpu_D_src_dst_loss = tf.cast(gpu_D_src_dst_loss, tf.float32)
                         
 
+                        gpu_D_src_dst_losses += [gpu_D_src_dst_loss]
+
+                        gpu_D_src_dst_loss_gvs.append(self.D_src_dst_opt.compute_gradients(tf.reduce_mean(gpu_D_src_dst_loss), self.D_src_dst_trainable_weights))
 
                         gan_G_loss = 0.5*gan_power*( DLoss(gpu_pred_src_src_d_ones, gpu_pred_src_src_d) + DLoss(gpu_pred_src_src_x2_d_ones, gpu_pred_src_src_x2_d))
 
@@ -554,15 +581,12 @@ class LambdaSAEHDModel(ModelBase):
                             gan_G_loss = tf.cast(gan_G_loss, tf.float32)
 
 
+                    # Per GPU gradient -----------------------------------------
+                    total_loss = tf.reduce_mean(gpu_src_loss) + tf.reduce_mean(gpu_dst_loss)
+                    if gan_power != 0:
+                        total_loss += tf.reduce_mean(gan_G_loss)
+                    gpu_G_loss_gvs.append(self.src_dst_opt.compute_gradients(total_loss, var_list=self.src_dst_trainable_weights))
 
-            self.src_loss = tf.reduce_mean(gpu_src_losses)
-            self.dst_loss = tf.reduce_mean(gpu_dst_losses)
-            self.G_loss = self.src_loss + self.dst_loss 
-
-            if gan_power != 0:
-                self.D_src_dst_loss = tf.reduce_mean(D_src_dst_loss)
-                self.gan_G_loss = tf.reduce_mean(gan_G_loss)
-                self.G_loss += self.gan_G_loss
 
             # Average losses and gradients, and create optimizer update ops
             with tf.device (models_opt_device):
@@ -573,16 +597,37 @@ class LambdaSAEHDModel(ModelBase):
                 pred_dst_dstm = nn.concat(gpu_pred_dst_dstm_list, 0)
                 pred_src_dstm = nn.concat(gpu_pred_src_dstm_list, 0)
 
-                src_loss = tf.concat(gpu_src_losses, 0)
-                dst_loss = tf.concat(gpu_dst_losses, 0)
-                # src_dst_loss_gv_op = self.src_dst_opt.get_update_op (nn.average_gv_list (gpu_G_loss_gvs))
+                G_grads = average_gradients(gpu_G_loss_gvs)
+
+                self.src_loss = tf.reduce_mean(tf.concat(gpu_src_losses, 0))
+                self.dst_loss = tf.reduce_mean(tf.concat(gpu_dst_losses, 0))                
+                self.G_train_op = self.src_dst_opt.apply_gradients(G_grads)
+                
+                if gan_power != 0:
+                    D_src_dst_grads = average_gradients(gpu_D_src_dst_loss_gvs)
+                    self.D_src_dst_loss = tf.reduce_mean(tf.concat(gpu_D_src_dst_losses, 0))
+                    self.D_src_dst_train_op = self.D_src_dst_opt.apply_gradients(D_src_dst_grads)
+
+                # print('----------------------------------------------------------------------')
+                # print(gpu_src_losses)
+                # print('----------------------------------------------------------------------')
+                # print(gpu_dst_losses)
+                # print('----------------------------------------------------------------------')
+                # print(gpu_G_loss_gvs)
+                # print(len(gpu_G_loss_gvs))
+                # print(len(gpu_G_loss_gvs[0]))
+                # print(len(gpu_G_loss_gvs[1]))
+                # print('----------------------------------------------------------------------')
+                # print(tower_grads)
+                # print(len(tower_grads))
+                # print('----------------------------------------------------------------------')
+                # print(self.train_op)
 
                 # if self.options['true_face_power'] != 0:
                 #     D_loss_gv_op = self.D_code_opt.get_update_op (nn.average_gv_list(gpu_D_code_loss_gvs))
 
                 # if gan_power != 0:
                 #     src_D_src_dst_loss_gv_op = self.D_src_dst_opt.get_update_op (nn.average_gv_list(gpu_D_src_dst_loss_gvs) )
-
 
             # # Initializing training and view functions
             # def src_dst_train(warped_src, target_src, target_srcm_all, \

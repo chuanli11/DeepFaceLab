@@ -1,0 +1,174 @@
+Running trainer TF1.
+
+
+Model first run.
+Model_tf1 is used - ---------------------------
+Initializing models:   0%|          | 0/4 [00:00<?, ?it/s]Initializing models:  25%|##5       | 1/4 [00:02<00:07,  2.54s/it]Initializing models:  50%|#####     | 2/4 [00:04<00:04,  2.34s/it]Initializing models:  75%|#######5  | 3/4 [00:06<00:02,  2.22s/it]Initializing models: 100%|##########| 4/4 [00:11<00:00,  3.15s/it]Initializing models: 100%|##########| 4/4 [00:11<00:00,  2.92s/it]
+Loading samples:   0%|          | 0/200 [00:00<?, ?it/s]Loading samples:   0%|          | 1/200 [00:00<00:04, 46.59it/s]Loading samples:   1%|1         | 2/200 [00:00<00:02, 91.57it/s]Loading samples:   2%|1         | 3/200 [00:00<00:01, 136.12it/s]Loading samples:   2%|2         | 4/200 [00:00<00:01, 145.74it/s]Loading samples:   2%|2         | 5/200 [00:00<00:01, 181.09it/s]Loading samples:   3%|3         | 6/200 [00:00<00:01, 182.19it/s]Loading samples:   4%|3         | 7/200 [00:00<00:00, 211.17it/s]Loading samples:   4%|4         | 8/200 [00:00<00:00, 240.38it/s]Loading samples:   4%|4         | 9/200 [00:00<00:00, 232.98it/s]Loading samples:   5%|5         | 10/200 [00:00<00:00, 256.70it/s]Loading samples:   6%|5         | 11/200 [00:00<00:00, 247.39it/s]Loading samples:   6%|6         | 12/200 [00:00<00:00, 268.61it/s]Loading samples:   6%|6         | 13/200 [00:00<00:00, 289.66it/s]Loading samples:   7%|7         | 14/200 [00:00<00:00, 272.14it/s]Loading samples:   8%|7         | 15/200 [00:00<00:00, 290.14it/s]Loading samples:   8%|8         | 16/200 [00:00<00:00, 280.43it/s]Loading samples:   8%|8         | 17/200 [00:00<00:00, 296.77it/s]Loading samples:   9%|9         | 18/200 [00:00<00:00, 313.42it/s]Loading samples:  10%|9         | 19/200 [00:00<00:00, 330.14it/s]Loading samples:  10%|#         | 20/200 [00:00<00:00, 305.79it/s]Loading samples:  10%|#         | 21/200 [00:00<00:00, 319.74it/s]Loading samples:  11%|#1        | 22/200 [00:00<00:00, 333.94it/s]Loading samples:  12%|#1        | 23/200 [00:00<00:00, 348.09it/s]Loading samples:  12%|#2        | 24/200 [00:00<00:00, 335.94it/s]Loading samples:  12%|#2        | 25/200 [00:00<00:00, 348.28it/s]Loading samples:  13%|#3        | 26/200 [00:00<00:00, 296.80it/s]Loading samples:  14%|#3        | 27/200 [00:00<00:00, 307.58it/s]Loading samples:  14%|#4        | 28/200 [00:00<00:00, 318.45it/s]Loading samples:  14%|#4        | 29/200 [00:00<00:00, 329.35it/s]Loading samples:  15%|#5        | 30/200 [00:00<00:00, 340.23it/s]Loading samples:  16%|#5        | 31/200 [00:00<00:00, 331.31it/s]Loading samples:  16%|#6        | 32/200 [00:00<00:00, 340.18it/s]Loading samples:  16%|#6        | 33/200 [00:00<00:00, 349.76it/s]Loading samples:  17%|#7        | 34/200 [00:00<00:00, 337.26it/s]Loading samples:  18%|#7        | 35/200 [00:00<00:00, 346.49it/s]Loading samples:  18%|#8        | 36/200 [00:00<00:00, 338.09it/s]Loading samples:  18%|#8        | 37/200 [00:00<00:00, 346.75it/s]Loading samples:  19%|#9        | 38/200 [00:00<00:00, 355.57it/s]Loading samples:  20%|#9        | 39/200 [00:00<00:00, 346.95it/s]Loading samples:  20%|##        | 40/200 [00:00<00:00, 354.64it/s]Loading samples:  20%|##        | 41/200 [00:00<00:00, 362.94it/s]Loading samples:  21%|##1       | 42/200 [00:00<00:00, 349.32it/s]Loading samples:  22%|##1       | 43/200 [00:00<00:00, 357.00it/s]Loading samples:  22%|##2       | 44/200 [00:00<00:00, 364.72it/s]Loading samples:  22%|##2       | 45/200 [00:00<00:00, 357.03it/s]Loading samples:  23%|##3       | 46/200 [00:00<00:00, 364.38it/s]Loading samples:  24%|##3       | 47/200 [00:00<00:00, 371.95it/s]Loading samples:  24%|##4       | 48/200 [00:00<00:00, 379.50it/s]Loading samples:  24%|##4       | 49/200 [00:00<00:00, 357.44it/s]Loading samples:  25%|##5       | 50/200 [00:00<00:00, 364.17it/s]Loading samples:  26%|##5       | 51/200 [00:00<00:00, 370.95it/s]Loading samples:  26%|##6       | 52/200 [00:00<00:00, 363.69it/s]Loading samples:  26%|##6       | 53/200 [00:00<00:00, 357.04it/s]Loading samples:  27%|##7       | 54/200 [00:00<00:00, 363.14it/s]Loading samples:  28%|##7       | 55/200 [00:00<00:00, 369.24it/s]Loading samples:  28%|##8       | 56/200 [00:00<00:00, 375.47it/s]Loading samples:  28%|##8       | 57/200 [00:00<00:00, 364.88it/s]Loading samples:  29%|##9       | 58/200 [00:00<00:00, 370.42it/s]Loading samples:  30%|##9       | 59/200 [00:00<00:00, 359.09it/s]Loading samples:  30%|###       | 60/200 [00:00<00:00, 364.76it/s]Loading samples:  30%|###       | 61/200 [00:00<00:00, 370.49it/s]Loading samples:  31%|###1      | 62/200 [00:00<00:00, 364.75it/s]Loading samples:  32%|###1      | 63/200 [00:00<00:00, 370.26it/s]Loading samples:  32%|###2      | 64/200 [00:00<00:00, 375.80it/s]Loading samples:  32%|###2      | 65/200 [00:00<00:00, 370.07it/s]Loading samples:  33%|###3      | 66/200 [00:00<00:00, 374.67it/s]Loading samples:  34%|###3      | 67/200 [00:00<00:00, 379.57it/s]Loading samples:  34%|###4      | 68/200 [00:00<00:00, 373.78it/s]Loading samples:  34%|###4      | 69/200 [00:00<00:00, 378.85it/s]Loading samples:  35%|###5      | 70/200 [00:00<00:00, 373.44it/s]Loading samples:  36%|###5      | 71/200 [00:00<00:00, 378.39it/s]Loading samples:  36%|###6      | 72/200 [00:00<00:00, 383.34it/s]Loading samples:  36%|###6      | 73/200 [00:00<00:00, 376.08it/s]Loading samples:  37%|###7      | 74/200 [00:00<00:00, 380.64it/s]Loading samples:  38%|###7      | 75/200 [00:00<00:00, 375.33it/s]Loading samples:  38%|###8      | 76/200 [00:00<00:00, 379.99it/s]Loading samples:  38%|###8      | 77/200 [00:00<00:00, 384.62it/s]Loading samples:  39%|###9      | 78/200 [00:00<00:00, 389.37it/s]Loading samples:  40%|###9      | 79/200 [00:00<00:00, 384.12it/s]Loading samples:  40%|####      | 80/200 [00:00<00:00, 388.51it/s]Loading samples:  40%|####      | 81/200 [00:00<00:00, 392.97it/s]Loading samples:  41%|####1     | 82/200 [00:00<00:00, 397.42it/s]Loading samples:  42%|####1     | 83/200 [00:00<00:00, 382.35it/s]Loading samples:  42%|####2     | 84/200 [00:00<00:00, 386.39it/s]Loading samples:  42%|####2     | 85/200 [00:00<00:00, 390.74it/s]Loading samples:  43%|####3     | 86/200 [00:00<00:00, 385.73it/s]Loading samples:  44%|####3     | 87/200 [00:00<00:00, 389.85it/s]Loading samples:  44%|####4     | 88/200 [00:00<00:00, 394.02it/s]Loading samples:  44%|####4     | 89/200 [00:00<00:00, 398.19it/s]Loading samples:  45%|####5     | 90/200 [00:00<00:00, 384.41it/s]Loading samples:  46%|####5     | 91/200 [00:00<00:00, 388.38it/s]Loading samples:  46%|####6     | 92/200 [00:00<00:00, 392.32it/s]Loading samples:  46%|####6     | 93/200 [00:00<00:00, 386.94it/s]Loading samples:  47%|####6     | 94/200 [00:00<00:00, 390.69it/s]Loading samples:  48%|####7     | 95/200 [00:00<00:00, 394.49it/s]Loading samples:  48%|####8     | 96/200 [00:00<00:00, 398.22it/s]Loading samples:  48%|####8     | 97/200 [00:00<00:00, 401.98it/s]Loading samples:  49%|####9     | 98/200 [00:00<00:00, 388.54it/s]Loading samples:  50%|####9     | 99/200 [00:00<00:00, 391.95it/s]Loading samples:  50%|#####     | 100/200 [00:00<00:00, 387.43it/s]Loading samples:  50%|#####     | 101/200 [00:00<00:00, 383.05it/s]Loading samples:  51%|#####1    | 102/200 [00:00<00:00, 386.51it/s]Loading samples:  52%|#####1    | 103/200 [00:00<00:00, 390.05it/s]Loading samples:  52%|#####2    | 104/200 [00:00<00:00, 393.61it/s]Loading samples:  52%|#####2    | 105/200 [00:00<00:00, 385.72it/s]Loading samples:  53%|#####3    | 106/200 [00:00<00:00, 389.09it/s]Loading samples:  54%|#####3    | 107/200 [00:00<00:00, 392.53it/s]Loading samples:  54%|#####4    | 108/200 [00:00<00:00, 388.06it/s]Loading samples:  55%|#####4    | 109/200 [00:00<00:00, 391.32it/s]Loading samples:  55%|#####5    | 110/200 [00:00<00:00, 387.36it/s]Loading samples:  56%|#####5    | 111/200 [00:00<00:00, 390.43it/s]Loading samples:  56%|#####6    | 112/200 [00:00<00:00, 393.70it/s]Loading samples:  56%|#####6    | 113/200 [00:00<00:00, 389.73it/s]Loading samples:  57%|#####6    | 114/200 [00:00<00:00, 392.91it/s]Loading samples:  57%|#####7    | 115/200 [00:00<00:00, 381.93it/s]Loading samples:  58%|#####8    | 116/200 [00:00<00:00, 384.86it/s]Loading samples:  58%|#####8    | 117/200 [00:00<00:00, 387.93it/s]Loading samples:  59%|#####8    | 118/200 [00:00<00:00, 391.00it/s]Loading samples:  60%|#####9    | 119/200 [00:00<00:00, 387.39it/s]Loading samples:  60%|######    | 120/200 [00:00<00:00, 390.41it/s]Loading samples:  60%|######    | 121/200 [00:00<00:00, 393.41it/s]Loading samples:  61%|######1   | 122/200 [00:00<00:00, 389.80it/s]Loading samples:  62%|######1   | 123/200 [00:00<00:00, 379.71it/s]Loading samples:  62%|######2   | 124/200 [00:00<00:00, 382.42it/s]Loading samples:  62%|######2   | 125/200 [00:00<00:00, 385.28it/s]Loading samples:  63%|######3   | 126/200 [00:00<00:00, 388.11it/s]Loading samples:  64%|######3   | 127/200 [00:00<00:00, 390.95it/s]Loading samples:  64%|######4   | 128/200 [00:00<00:00, 387.47it/s]Loading samples:  64%|######4   | 129/200 [00:00<00:00, 390.22it/s]Loading samples:  65%|######5   | 130/200 [00:00<00:00, 386.54it/s]Loading samples:  66%|######5   | 131/200 [00:00<00:00, 383.23it/s]Loading samples:  66%|######6   | 132/200 [00:00<00:00, 385.91it/s]Loading samples:  66%|######6   | 133/200 [00:00<00:00, 388.30it/s]Loading samples:  67%|######7   | 134/200 [00:00<00:00, 385.12it/s]Loading samples:  68%|######7   | 135/200 [00:00<00:00, 387.75it/s]Loading samples:  68%|######8   | 136/200 [00:00<00:00, 390.41it/s]Loading samples:  68%|######8   | 137/200 [00:00<00:00, 393.08it/s]Loading samples:  69%|######9   | 138/200 [00:00<00:00, 395.77it/s]Loading samples:  70%|######9   | 139/200 [00:00<00:00, 386.86it/s]Loading samples:  70%|#######   | 140/200 [00:00<00:00, 389.12it/s]Loading samples:  70%|#######   | 141/200 [00:00<00:00, 383.76it/s]Loading samples:  71%|#######1  | 142/200 [00:00<00:00, 386.29it/s]Loading samples:  72%|#######1  | 143/200 [00:00<00:00, 388.88it/s]Loading samples:  72%|#######2  | 144/200 [00:00<00:00, 391.47it/s]Loading samples:  72%|#######2  | 145/200 [00:00<00:00, 394.07it/s]Loading samples:  73%|#######3  | 146/200 [00:00<00:00, 394.79it/s]Loading samples:  74%|#######3  | 147/200 [00:00<00:00, 388.97it/s]Loading samples:  74%|#######4  | 148/200 [00:00<00:00, 391.23it/s]Loading samples:  74%|#######4  | 149/200 [00:00<00:00, 384.20it/s]Loading samples:  75%|#######5  | 150/200 [00:00<00:00, 386.56it/s]Loading samples:  76%|#######5  | 151/200 [00:00<00:00, 388.93it/s]Loading samples:  76%|#######6  | 152/200 [00:00<00:00, 391.33it/s]Loading samples:  76%|#######6  | 153/200 [00:00<00:00, 393.73it/s]Loading samples:  77%|#######7  | 154/200 [00:00<00:00, 388.67it/s]Loading samples:  78%|#######7  | 155/200 [00:00<00:00, 385.81it/s]Loading samples:  78%|#######8  | 156/200 [00:00<00:00, 388.13it/s]Loading samples:  78%|#######8  | 157/200 [00:00<00:00, 390.48it/s]Loading samples:  79%|#######9  | 158/200 [00:00<00:00, 387.81it/s]Loading samples:  80%|#######9  | 159/200 [00:00<00:00, 390.12it/s]Loading samples:  80%|########  | 160/200 [00:00<00:00, 392.45it/s]Loading samples:  80%|########  | 161/200 [00:00<00:00, 394.77it/s]Loading samples:  81%|########1 | 162/200 [00:00<00:00, 387.20it/s]Loading samples:  82%|########1 | 163/200 [00:00<00:00, 389.35it/s]Loading samples:  82%|########2 | 164/200 [00:00<00:00, 391.58it/s]Loading samples:  82%|########2 | 165/200 [00:00<00:00, 388.97it/s]Loading samples:  83%|########2 | 166/200 [00:00<00:00, 391.05it/s]Loading samples:  84%|########3 | 167/200 [00:00<00:00, 393.25it/s]Loading samples:  84%|########4 | 168/200 [00:00<00:00, 395.37it/s]Loading samples:  84%|########4 | 169/200 [00:00<00:00, 392.69it/s]Loading samples:  85%|########5 | 170/200 [00:00<00:00, 394.77it/s]Loading samples:  86%|########5 | 171/200 [00:00<00:00, 392.14it/s]Loading samples:  86%|########6 | 172/200 [00:00<00:00, 394.25it/s]Loading samples:  86%|########6 | 173/200 [00:00<00:00, 391.69it/s]Loading samples:  87%|########7 | 174/200 [00:00<00:00, 393.74it/s]Loading samples:  88%|########7 | 175/200 [00:00<00:00, 395.87it/s]Loading samples:  88%|########8 | 176/200 [00:00<00:00, 392.67it/s]Loading samples:  88%|########8 | 177/200 [00:00<00:00, 394.68it/s]Loading samples:  89%|########9 | 178/200 [00:00<00:00, 391.33it/s]Loading samples:  90%|########9 | 179/200 [00:00<00:00, 393.24it/s]Loading samples:  90%|######### | 180/200 [00:00<00:00, 387.92it/s]Loading samples:  90%|######### | 181/200 [00:00<00:00, 389.80it/s]Loading samples:  91%|#########1| 182/200 [00:00<00:00, 391.77it/s]Loading samples:  92%|#########1| 183/200 [00:00<00:00, 393.78it/s]Loading samples:  92%|#########2| 184/200 [00:00<00:00, 391.41it/s]Loading samples:  92%|#########2| 185/200 [00:00<00:00, 393.34it/s]Loading samples:  93%|#########3| 186/200 [00:00<00:00, 390.89it/s]Loading samples:  94%|#########3| 187/200 [00:00<00:00, 388.38it/s]Loading samples:  94%|#########3| 188/200 [00:00<00:00, 390.29it/s]Loading samples:  94%|#########4| 189/200 [00:00<00:00, 388.06it/s]Loading samples:  95%|#########5| 190/200 [00:00<00:00, 389.86it/s]Loading samples:  96%|#########5| 191/200 [00:00<00:00, 387.26it/s]Loading samples:  96%|#########6| 192/200 [00:00<00:00, 389.15it/s]Loading samples:  96%|#########6| 193/200 [00:00<00:00, 386.97it/s]Loading samples:  97%|#########7| 194/200 [00:00<00:00, 388.82it/s]Loading samples:  98%|#########7| 195/200 [00:00<00:00, 390.70it/s]Loading samples:  98%|#########8| 196/200 [00:00<00:00, 392.59it/s]Loading samples:  98%|#########8| 197/200 [00:00<00:00, 390.42it/s]Loading samples:  99%|#########9| 198/200 [00:00<00:00, 392.25it/s]Loading samples: 100%|#########9| 199/200 [00:00<00:00, 386.16it/s]Loading samples: 100%|##########| 200/200 [00:00<00:00, 384.06it/s]Loading samples: 100%|##########| 200/200 [00:00<00:00, 352.86it/s]
+Loading samples:   0%|          | 0/198 [00:00<?, ?it/s]Loading samples:   1%|          | 1/198 [00:00<00:06, 31.36it/s]Loading samples:   1%|1         | 2/198 [00:00<00:03, 61.54it/s]Loading samples:   2%|1         | 3/198 [00:00<00:02, 91.69it/s]Loading samples:   2%|2         | 4/198 [00:00<00:01, 121.70it/s]Loading samples:   3%|2         | 5/198 [00:00<00:01, 103.14it/s]Loading samples:   3%|3         | 6/198 [00:00<00:01, 106.41it/s]Loading samples:   4%|3         | 7/198 [00:00<00:01, 112.21it/s]Loading samples:   4%|4         | 8/198 [00:00<00:01, 127.76it/s]Loading samples:   5%|4         | 9/198 [00:00<00:01, 127.73it/s]Loading samples:   5%|5         | 10/198 [00:00<00:01, 141.29it/s]Loading samples:   6%|5         | 11/198 [00:00<00:01, 154.93it/s]Loading samples:   6%|6         | 12/198 [00:00<00:01, 144.56it/s]Loading samples:   7%|6         | 13/198 [00:00<00:01, 156.02it/s]Loading samples:   7%|7         | 14/198 [00:00<00:01, 148.21it/s]Loading samples:   8%|7         | 15/198 [00:00<00:01, 158.34it/s]Loading samples:   8%|8         | 16/198 [00:00<00:01, 156.23it/s]Loading samples:   9%|8         | 17/198 [00:00<00:01, 165.58it/s]Loading samples:   9%|9         | 18/198 [00:00<00:01, 163.09it/s]Loading samples:  10%|9         | 19/198 [00:00<00:01, 171.63it/s]Loading samples:  10%|#         | 20/198 [00:00<00:01, 171.97it/s]Loading samples:  11%|#         | 21/198 [00:00<00:01, 171.98it/s]Loading samples:  11%|#1        | 22/198 [00:00<00:01, 174.15it/s]Loading samples:  12%|#1        | 23/198 [00:00<00:00, 181.68it/s]Loading samples:  12%|#2        | 24/198 [00:00<00:00, 180.38it/s]Loading samples:  13%|#2        | 25/198 [00:00<00:00, 183.15it/s]Loading samples:  13%|#3        | 26/198 [00:00<00:00, 190.18it/s]Loading samples:  14%|#3        | 27/198 [00:00<00:00, 197.26it/s]Loading samples:  14%|#4        | 28/198 [00:00<00:00, 204.34it/s]Loading samples:  15%|#4        | 29/198 [00:00<00:00, 198.14it/s]Loading samples:  15%|#5        | 30/198 [00:00<00:00, 194.39it/s]Loading samples:  16%|#5        | 31/198 [00:00<00:00, 200.16it/s]Loading samples:  16%|#6        | 32/198 [00:00<00:00, 206.23it/s]Loading samples:  17%|#6        | 33/198 [00:00<00:00, 203.24it/s]Loading samples:  17%|#7        | 34/198 [00:00<00:00, 208.86it/s]Loading samples:  18%|#7        | 35/198 [00:00<00:00, 214.68it/s]Loading samples:  18%|#8        | 36/198 [00:00<00:00, 211.16it/s]Loading samples:  19%|#8        | 37/198 [00:00<00:00, 209.86it/s]Loading samples:  19%|#9        | 38/198 [00:00<00:00, 215.19it/s]Loading samples:  20%|#9        | 39/198 [00:00<00:00, 220.58it/s]Loading samples:  20%|##        | 40/198 [00:00<00:00, 216.32it/s]Loading samples:  21%|##        | 41/198 [00:00<00:00, 220.54it/s]Loading samples:  21%|##1       | 42/198 [00:00<00:00, 218.90it/s]Loading samples:  22%|##1       | 43/198 [00:00<00:00, 223.54it/s]Loading samples:  22%|##2       | 44/198 [00:00<00:00, 228.42it/s]Loading samples:  23%|##2       | 45/198 [00:00<00:00, 223.68it/s]Loading samples:  23%|##3       | 46/198 [00:00<00:00, 216.82it/s]Loading samples:  24%|##3       | 47/198 [00:00<00:00, 220.99it/s]Loading samples:  24%|##4       | 48/198 [00:00<00:00, 219.97it/s]Loading samples:  25%|##4       | 49/198 [00:00<00:00, 224.15it/s]Loading samples:  25%|##5       | 50/198 [00:00<00:00, 228.44it/s]Loading samples:  26%|##5       | 51/198 [00:00<00:00, 225.29it/s]Loading samples:  26%|##6       | 52/198 [00:00<00:00, 229.27it/s]Loading samples:  27%|##6       | 53/198 [00:00<00:00, 227.98it/s]Loading samples:  27%|##7       | 54/198 [00:00<00:00, 230.21it/s]Loading samples:  28%|##7       | 55/198 [00:00<00:00, 226.72it/s]Loading samples:  28%|##8       | 56/198 [00:00<00:00, 230.51it/s]Loading samples:  29%|##8       | 57/198 [00:00<00:00, 234.46it/s]Loading samples:  29%|##9       | 58/198 [00:00<00:00, 231.22it/s]Loading samples:  30%|##9       | 59/198 [00:00<00:00, 228.32it/s]Loading samples:  30%|###       | 60/198 [00:00<00:00, 225.60it/s]Loading samples:  31%|###       | 61/198 [00:00<00:00, 229.16it/s]Loading samples:  31%|###1      | 62/198 [00:00<00:00, 232.75it/s]Loading samples:  32%|###1      | 63/198 [00:00<00:00, 226.23it/s]Loading samples:  32%|###2      | 64/198 [00:00<00:00, 229.65it/s]Loading samples:  33%|###2      | 65/198 [00:00<00:00, 228.76it/s]Loading samples:  33%|###3      | 66/198 [00:00<00:00, 232.01it/s]Loading samples:  34%|###3      | 67/198 [00:00<00:00, 235.33it/s]Loading samples:  34%|###4      | 68/198 [00:00<00:00, 238.72it/s]Loading samples:  35%|###4      | 69/198 [00:00<00:00, 235.19it/s]Loading samples:  35%|###5      | 70/198 [00:00<00:00, 238.32it/s]Loading samples:  36%|###5      | 71/198 [00:00<00:00, 236.90it/s]Loading samples:  36%|###6      | 72/198 [00:00<00:00, 229.63it/s]Loading samples:  37%|###6      | 73/198 [00:00<00:00, 232.67it/s]Loading samples:  37%|###7      | 74/198 [00:00<00:00, 235.74it/s]Loading samples:  38%|###7      | 75/198 [00:00<00:00, 234.77it/s]Loading samples:  38%|###8      | 76/198 [00:00<00:00, 237.54it/s]Loading samples:  39%|###8      | 77/198 [00:00<00:00, 236.45it/s]Loading samples:  39%|###9      | 78/198 [00:00<00:00, 239.25it/s]Loading samples:  40%|###9      | 79/198 [00:00<00:00, 242.14it/s]Loading samples:  40%|####      | 80/198 [00:00<00:00, 235.05it/s]Loading samples:  41%|####      | 81/198 [00:00<00:00, 237.82it/s]Loading samples:  41%|####1     | 82/198 [00:00<00:00, 240.60it/s]Loading samples:  42%|####1     | 83/198 [00:00<00:00, 234.17it/s]Loading samples:  42%|####2     | 84/198 [00:00<00:00, 236.84it/s]Loading samples:  43%|####2     | 85/198 [00:00<00:00, 239.33it/s]Loading samples:  43%|####3     | 86/198 [00:00<00:00, 241.96it/s]Loading samples:  44%|####3     | 87/198 [00:00<00:00, 240.63it/s]Loading samples:  44%|####4     | 88/198 [00:00<00:00, 243.16it/s]Loading samples:  45%|####4     | 89/198 [00:00<00:00, 240.27it/s]Loading samples:  45%|####5     | 90/198 [00:00<00:00, 239.41it/s]Loading samples:  46%|####5     | 91/198 [00:00<00:00, 241.91it/s]Loading samples:  46%|####6     | 92/198 [00:00<00:00, 244.46it/s]Loading samples:  47%|####6     | 93/198 [00:00<00:00, 243.21it/s]Loading samples:  47%|####7     | 94/198 [00:00<00:00, 243.40it/s]Loading samples:  48%|####7     | 95/198 [00:00<00:00, 240.86it/s]Loading samples:  48%|####8     | 96/198 [00:00<00:00, 243.23it/s]Loading samples:  49%|####8     | 97/198 [00:00<00:00, 241.04it/s]Loading samples:  49%|####9     | 98/198 [00:00<00:00, 243.38it/s]Loading samples:  50%|#####     | 99/198 [00:00<00:00, 242.55it/s]Loading samples:  51%|#####     | 100/198 [00:00<00:00, 244.86it/s]Loading samples:  51%|#####1    | 101/198 [00:00<00:00, 247.17it/s]Loading samples:  52%|#####1    | 102/198 [00:00<00:00, 242.84it/s]Loading samples:  52%|#####2    | 103/198 [00:00<00:00, 235.38it/s]Loading samples:  53%|#####2    | 104/198 [00:00<00:00, 237.53it/s]Loading samples:  53%|#####3    | 105/198 [00:00<00:00, 239.72it/s]Loading samples:  54%|#####3    | 106/198 [00:00<00:00, 241.90it/s]Loading samples:  54%|#####4    | 107/198 [00:00<00:00, 244.10it/s]Loading samples:  55%|#####4    | 108/198 [00:00<00:00, 246.32it/s]Loading samples:  55%|#####5    | 109/198 [00:00<00:00, 248.51it/s]Loading samples:  56%|#####5    | 110/198 [00:00<00:00, 250.70it/s]Loading samples:  56%|#####6    | 111/198 [00:00<00:00, 240.08it/s]Loading samples:  57%|#####6    | 112/198 [00:00<00:00, 238.61it/s]Loading samples:  57%|#####7    | 113/198 [00:00<00:00, 240.52it/s]Loading samples:  58%|#####7    | 114/198 [00:00<00:00, 242.53it/s]Loading samples:  58%|#####8    | 115/198 [00:00<00:00, 240.38it/s]Loading samples:  59%|#####8    | 116/198 [00:00<00:00, 242.31it/s]Loading samples:  59%|#####9    | 117/198 [00:00<00:00, 240.58it/s]Loading samples:  60%|#####9    | 118/198 [00:00<00:00, 242.39it/s]Loading samples:  60%|######    | 119/198 [00:00<00:00, 238.78it/s]Loading samples:  61%|######    | 120/198 [00:00<00:00, 240.63it/s]Loading samples:  61%|######1   | 121/198 [00:00<00:00, 242.52it/s]Loading samples:  62%|######1   | 122/198 [00:00<00:00, 241.90it/s]Loading samples:  62%|######2   | 123/198 [00:00<00:00, 243.76it/s]Loading samples:  63%|######2   | 124/198 [00:00<00:00, 242.85it/s]Loading samples:  63%|######3   | 125/198 [00:00<00:00, 241.11it/s]Loading samples:  64%|######3   | 126/198 [00:00<00:00, 239.31it/s]Loading samples:  64%|######4   | 127/198 [00:00<00:00, 241.07it/s]Loading samples:  65%|######4   | 128/198 [00:00<00:00, 242.86it/s]Loading samples:  65%|######5   | 129/198 [00:00<00:00, 244.67it/s]Loading samples:  66%|######5   | 130/198 [00:00<00:00, 243.25it/s]Loading samples:  66%|######6   | 131/198 [00:00<00:00, 244.96it/s]Loading samples:  67%|######6   | 132/198 [00:00<00:00, 242.85it/s]Loading samples:  67%|######7   | 133/198 [00:00<00:00, 238.20it/s]Loading samples:  68%|######7   | 134/198 [00:00<00:00, 239.84it/s]Loading samples:  68%|######8   | 135/198 [00:00<00:00, 241.53it/s]Loading samples:  69%|######8   | 136/198 [00:00<00:00, 243.23it/s]Loading samples:  69%|######9   | 137/198 [00:00<00:00, 244.93it/s]Loading samples:  70%|######9   | 138/198 [00:00<00:00, 246.65it/s]Loading samples:  70%|#######   | 139/198 [00:00<00:00, 245.60it/s]Loading samples:  71%|#######   | 140/198 [00:00<00:00, 247.18it/s]Loading samples:  71%|#######1  | 141/198 [00:00<00:00, 241.42it/s]Loading samples:  72%|#######1  | 142/198 [00:00<00:00, 243.03it/s]Loading samples:  72%|#######2  | 143/198 [00:00<00:00, 244.66it/s]Loading samples:  73%|#######2  | 144/198 [00:00<00:00, 246.29it/s]Loading samples:  73%|#######3  | 145/198 [00:00<00:00, 245.15it/s]Loading samples:  74%|#######3  | 146/198 [00:00<00:00, 246.74it/s]Loading samples:  74%|#######4  | 147/198 [00:00<00:00, 246.19it/s]Loading samples:  75%|#######4  | 148/198 [00:00<00:00, 247.77it/s]Loading samples:  75%|#######5  | 149/198 [00:00<00:00, 243.60it/s]Loading samples:  76%|#######5  | 150/198 [00:00<00:00, 245.02it/s]Loading samples:  76%|#######6  | 151/198 [00:00<00:00, 246.52it/s]Loading samples:  77%|#######6  | 152/198 [00:00<00:00, 248.08it/s]Loading samples:  77%|#######7  | 153/198 [00:00<00:00, 249.63it/s]Loading samples:  78%|#######7  | 154/198 [00:00<00:00, 249.04it/s]Loading samples:  78%|#######8  | 155/198 [00:00<00:00, 244.33it/s]Loading samples:  79%|#######8  | 156/198 [00:00<00:00, 245.81it/s]Loading samples:  79%|#######9  | 157/198 [00:00<00:00, 247.31it/s]Loading samples:  80%|#######9  | 158/198 [00:00<00:00, 248.83it/s]Loading samples:  80%|########  | 159/198 [00:00<00:00, 248.23it/s]Loading samples:  81%|########  | 160/198 [00:00<00:00, 246.01it/s]Loading samples:  81%|########1 | 161/198 [00:00<00:00, 244.52it/s]Loading samples:  82%|########1 | 162/198 [00:00<00:00, 245.94it/s]Loading samples:  82%|########2 | 163/198 [00:00<00:00, 243.12it/s]Loading samples:  83%|########2 | 164/198 [00:00<00:00, 244.53it/s]Loading samples:  83%|########3 | 165/198 [00:00<00:00, 245.96it/s]Loading samples:  84%|########3 | 166/198 [00:00<00:00, 245.40it/s]Loading samples:  84%|########4 | 167/198 [00:00<00:00, 246.70it/s]Loading samples:  85%|########4 | 168/198 [00:00<00:00, 244.72it/s]Loading samples:  85%|########5 | 169/198 [00:00<00:00, 246.08it/s]Loading samples:  86%|########5 | 170/198 [00:00<00:00, 247.46it/s]Loading samples:  86%|########6 | 171/198 [00:00<00:00, 246.93it/s]Loading samples:  87%|########6 | 172/198 [00:00<00:00, 246.31it/s]Loading samples:  87%|########7 | 173/198 [00:00<00:00, 247.62it/s]Loading samples:  88%|########7 | 174/198 [00:00<00:00, 246.66it/s]Loading samples:  88%|########8 | 175/198 [00:00<00:00, 244.96it/s]Loading samples:  89%|########8 | 176/198 [00:00<00:00, 246.25it/s]Loading samples:  89%|########9 | 177/198 [00:00<00:00, 246.86it/s]Loading samples:  90%|########9 | 178/198 [00:00<00:00, 246.24it/s]Loading samples:  90%|######### | 179/198 [00:00<00:00, 247.55it/s]Loading samples:  91%|######### | 180/198 [00:00<00:00, 248.89it/s]Loading samples:  91%|#########1| 181/198 [00:00<00:00, 250.22it/s]Loading samples:  92%|#########1| 182/198 [00:00<00:00, 247.29it/s]Loading samples:  92%|#########2| 183/198 [00:00<00:00, 246.46it/s]Loading samples:  93%|#########2| 184/198 [00:00<00:00, 247.70it/s]Loading samples:  93%|#########3| 185/198 [00:00<00:00, 246.60it/s]Loading samples:  94%|#########3| 186/198 [00:00<00:00, 247.80it/s]Loading samples:  94%|#########4| 187/198 [00:00<00:00, 249.01it/s]Loading samples:  95%|#########4| 188/198 [00:00<00:00, 250.26it/s]Loading samples:  95%|#########5| 189/198 [00:00<00:00, 249.20it/s]Loading samples:  96%|#########5| 190/198 [00:00<00:00, 248.16it/s]Loading samples:  96%|#########6| 191/198 [00:00<00:00, 246.62it/s]Loading samples:  97%|#########6| 192/198 [00:00<00:00, 247.49it/s]Loading samples:  97%|#########7| 193/198 [00:00<00:00, 248.72it/s]Loading samples:  98%|#########7| 194/198 [00:00<00:00, 248.19it/s]Loading samples:  98%|#########8| 195/198 [00:00<00:00, 247.72it/s]Loading samples:  99%|#########8| 196/198 [00:00<00:00, 247.20it/s]Loading samples:  99%|#########9| 197/198 [00:00<00:00, 248.30it/s]Loading samples: 100%|##########| 198/198 [00:00<00:00, 247.78it/s]Loading samples: 100%|##########| 198/198 [00:00<00:00, 226.14it/s]
+================= Model Summary ==================
+==                                              ==
+==            Model name: benchmark_LambdaSAEHD ==
+==                                              ==
+==     Current iteration: 0                     ==
+==                                              ==
+==--------------- Model Options ----------------==
+==                                              ==
+==               use_syn: False                 ==
+==         use_benchmark: True                  ==
+==               num_gpu: 1                     ==
+==             precision: float32               ==
+==            bs_per_gpu: 8                     ==
+==       masked_training: True                  ==
+==           uniform_yaw: False                 ==
+==       autobackup_hour: 1                     ==
+== write_preview_history: True                  ==
+==           target_iter: 400                   ==
+==           random_flip: False                 ==
+==            batch_size: 8                     ==
+==            resolution: 128                   ==
+==             face_type: wf                    ==
+==     models_opt_on_gpu: False                 ==
+==                 archi: liae-ud               ==
+==               ae_dims: 64                    ==
+==                e_dims: 32                    ==
+==                d_dims: 32                    ==
+==           d_mask_dims: 32                    ==
+==             eyes_prio: False                 ==
+==            lr_dropout: False                 ==
+==           random_warp: False                 ==
+==             gan_power: 0.0                   ==
+==       true_face_power: 0.0                   ==
+==      face_style_power: 0.0                   ==
+==        bg_style_power: 0.0                   ==
+==               ct_mode: none                  ==
+==              clipgrad: False                 ==
+==              pretrain: False                 ==
+==               use_amp: True                  ==
+==                                              ==
+==----------------- Running On -----------------==
+==                                              ==
+==          Device index: 0                     ==
+==                  Name: Quadro RTX 8000       ==
+==                  VRAM: 47.46GB               ==
+==                                              ==
+==================================================
+Starting. Target iteration: 400. Press "Enter" to stop training and save model.
+initializing variables ... 
+current_loss_scale:0
+good_steps:0
+cond_1/beta1_power:0
+cond_1/beta2_power:0
+encoder/down1/downs_0/conv1/weight/Adam:0
+encoder/down1/downs_0/conv1/weight/Adam_1:0
+encoder/down1/downs_0/conv1/bias/Adam:0
+encoder/down1/downs_0/conv1/bias/Adam_1:0
+encoder/down1/downs_1/conv1/weight/Adam:0
+encoder/down1/downs_1/conv1/weight/Adam_1:0
+encoder/down1/downs_1/conv1/bias/Adam:0
+encoder/down1/downs_1/conv1/bias/Adam_1:0
+encoder/down1/downs_2/conv1/weight/Adam:0
+encoder/down1/downs_2/conv1/weight/Adam_1:0
+encoder/down1/downs_2/conv1/bias/Adam:0
+encoder/down1/downs_2/conv1/bias/Adam_1:0
+encoder/down1/downs_3/conv1/weight/Adam:0
+encoder/down1/downs_3/conv1/weight/Adam_1:0
+encoder/down1/downs_3/conv1/bias/Adam:0
+encoder/down1/downs_3/conv1/bias/Adam_1:0
+inter_AB/dense1/weight/Adam:0
+inter_AB/dense1/weight/Adam_1:0
+inter_AB/dense1/bias/Adam:0
+inter_AB/dense1/bias/Adam_1:0
+inter_AB/dense2/weight/Adam:0
+inter_AB/dense2/weight/Adam_1:0
+inter_AB/dense2/bias/Adam:0
+inter_AB/dense2/bias/Adam_1:0
+inter_AB/upscale1/conv1/weight/Adam:0
+inter_AB/upscale1/conv1/weight/Adam_1:0
+inter_AB/upscale1/conv1/bias/Adam:0
+inter_AB/upscale1/conv1/bias/Adam_1:0
+inter_B/dense1/weight/Adam:0
+inter_B/dense1/weight/Adam_1:0
+inter_B/dense1/bias/Adam:0
+inter_B/dense1/bias/Adam_1:0
+inter_B/dense2/weight/Adam:0
+inter_B/dense2/weight/Adam_1:0
+inter_B/dense2/bias/Adam:0
+inter_B/dense2/bias/Adam_1:0
+inter_B/upscale1/conv1/weight/Adam:0
+inter_B/upscale1/conv1/weight/Adam_1:0
+inter_B/upscale1/conv1/bias/Adam:0
+inter_B/upscale1/conv1/bias/Adam_1:0
+decoder/upscale0/conv1/weight/Adam:0
+decoder/upscale0/conv1/weight/Adam_1:0
+decoder/upscale0/conv1/bias/Adam:0
+decoder/upscale0/conv1/bias/Adam_1:0
+decoder/upscale1/conv1/weight/Adam:0
+decoder/upscale1/conv1/weight/Adam_1:0
+decoder/upscale1/conv1/bias/Adam:0
+decoder/upscale1/conv1/bias/Adam_1:0
+decoder/upscale2/conv1/weight/Adam:0
+decoder/upscale2/conv1/weight/Adam_1:0
+decoder/upscale2/conv1/bias/Adam:0
+decoder/upscale2/conv1/bias/Adam_1:0
+decoder/res0/conv1/weight/Adam:0
+decoder/res0/conv1/weight/Adam_1:0
+decoder/res0/conv1/bias/Adam:0
+decoder/res0/conv1/bias/Adam_1:0
+decoder/res0/conv2/weight/Adam:0
+decoder/res0/conv2/weight/Adam_1:0
+decoder/res0/conv2/bias/Adam:0
+decoder/res0/conv2/bias/Adam_1:0
+decoder/res1/conv1/weight/Adam:0
+decoder/res1/conv1/weight/Adam_1:0
+decoder/res1/conv1/bias/Adam:0
+decoder/res1/conv1/bias/Adam_1:0
+decoder/res1/conv2/weight/Adam:0
+decoder/res1/conv2/weight/Adam_1:0
+decoder/res1/conv2/bias/Adam:0
+decoder/res1/conv2/bias/Adam_1:0
+decoder/res2/conv1/weight/Adam:0
+decoder/res2/conv1/weight/Adam_1:0
+decoder/res2/conv1/bias/Adam:0
+decoder/res2/conv1/bias/Adam_1:0
+decoder/res2/conv2/weight/Adam:0
+decoder/res2/conv2/weight/Adam_1:0
+decoder/res2/conv2/bias/Adam:0
+decoder/res2/conv2/bias/Adam_1:0
+decoder/out_conv/weight/Adam:0
+decoder/out_conv/weight/Adam_1:0
+decoder/out_conv/bias/Adam:0
+decoder/out_conv/bias/Adam_1:0
+decoder/upscalem0/conv1/weight/Adam:0
+decoder/upscalem0/conv1/weight/Adam_1:0
+decoder/upscalem0/conv1/bias/Adam:0
+decoder/upscalem0/conv1/bias/Adam_1:0
+decoder/upscalem1/conv1/weight/Adam:0
+decoder/upscalem1/conv1/weight/Adam_1:0
+decoder/upscalem1/conv1/bias/Adam:0
+decoder/upscalem1/conv1/bias/Adam_1:0
+decoder/upscalem2/conv1/weight/Adam:0
+decoder/upscalem2/conv1/weight/Adam_1:0
+decoder/upscalem2/conv1/bias/Adam:0
+decoder/upscalem2/conv1/bias/Adam_1:0
+decoder/out_convm/weight/Adam:0
+decoder/out_convm/weight/Adam_1:0
+decoder/out_convm/bias/Adam:0
+decoder/out_convm/bias/Adam_1:0
+decoder/out_conv1/weight/Adam:0
+decoder/out_conv1/weight/Adam_1:0
+decoder/out_conv1/bias/Adam:0
+decoder/out_conv1/bias/Adam_1:0
+decoder/out_conv2/weight/Adam:0
+decoder/out_conv2/weight/Adam_1:0
+decoder/out_conv2/bias/Adam:0
+decoder/out_conv2/bias/Adam_1:0
+decoder/out_conv3/weight/Adam:0
+decoder/out_conv3/weight/Adam_1:0
+decoder/out_conv3/bias/Adam:0
+decoder/out_conv3/bias/Adam_1:0
+decoder/upscalem3/conv1/weight/Adam:0
+decoder/upscalem3/conv1/weight/Adam_1:0
+decoder/upscalem3/conv1/bias/Adam:0
+decoder/upscalem3/conv1/bias/Adam_1:0
+done 

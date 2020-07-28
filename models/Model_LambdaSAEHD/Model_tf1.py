@@ -20,7 +20,7 @@ class LambdaSAEHDModel(ModelBase):
 
     #override
     def on_initialize_options(self):
-        print('Model_tf1 is used - ---------------------------')
+        print('Model_tf1 is used ---------------------------')
         device_config = nn.getCurrentDeviceConfig()
         if not self.config_file is None:                    
             with open(self.config_file) as file:
