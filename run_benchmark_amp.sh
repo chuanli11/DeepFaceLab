@@ -1,5 +1,5 @@
 #!/bin/bash
-CONFIG=${1:-LambdaSAEHD_cl_liae_ud_gan_3_416_256_128_128_32}
+CONFIG=${1:-LambdaSAEHD_mini}
 NUM_STEPS=${2:-400}
 BS_PER_GPU_FP32=${3:-8}
 BS_PER_GPU_AMP=${4:-16}
@@ -12,7 +12,7 @@ API=${8:-dfl}
 
 wait $! 
 
-./benchmark.sh benchmark/config/config_${CONFIG} $NUM_STEPS $SRC_PATH $DST_PATH float32 on $BS_PER_GPU_FP32 $LOG_PATH tf1
+./benchmark.sh benchmark/config/config_${CONFIG} $NUM_STEPS $SRC_PATH $DST_PATH float32 on $BS_PER_GPU_FP32 $LOG_PATH tf1-multi
 
 # wait $! 
 

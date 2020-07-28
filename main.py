@@ -140,6 +140,9 @@ if __name__ == "__main__":
         elif arguments.api == 'tf1':
           from mainscripts import Trainer_tf1
           Trainer_tf1.main(**kwargs)
+        elif arguments.api == 'tf1-multi':
+          from mainscripts import Trainer_tf1_multi
+          Trainer_tf1_multi.main(**kwargs)
         else:
           print('Training API {} is invalid'.format(arguments.api))
           exit(0)
@@ -162,7 +165,7 @@ if __name__ == "__main__":
     p.add_argument('--precision', dest="precision", default='float32', help="Precision for training")
     p.add_argument('--bs-per-gpu', dest="bs_per_gpu", default=1, help="Batch size per GPU")
     p.add_argument('--use-amp', action="store_true", dest="use_amp", default=False, help="Use automatic mixed precision.")
-    p.add_argument('--api', required=True, dest="api", choices=['dfl', 'tf1'], help="API for training.")
+    p.add_argument('--api', required=True, dest="api", choices=['dfl', 'tf1', 'tf1-multi'], help="API for training.")
     p.add_argument('--execute-program', dest="execute_program", default=[], action='append', nargs='+')
     p.set_defaults (func=process_train)
 
