@@ -182,7 +182,8 @@ def trainerThread (s2c, c2s, e,
                         list_loss = []
 
                         # Train auto-encoder
-                        _, src_loss, dst_loss = nn.tf_sess.run([model.G_train_op, model.src_loss, model.dst_loss], feed_dict={
+                        _, src_loss, dst_loss = nn.tf_sess.run(
+                            [model.G_train_op, model.src_loss, model.dst_loss], feed_dict={
                             model.warped_src :warped_src,
                             model.target_src :target_src,
                             model.target_srcm_all:target_srcm_all,
@@ -190,6 +191,15 @@ def trainerThread (s2c, c2s, e,
                             model.target_dst :target_dst,
                             model.target_dstm_all:target_dstm_all})
                         list_loss = [float(src_loss), float(dst_loss)]
+
+                        # print(len(_debug_gpu_G_loss_gvs[0]))
+                        # for idx, g_and_v in enumerate(_debug_gpu_G_loss_gvs[0]):
+                        #     print('g: max {}, min {}; v: max {}, min {}'.format(
+                        #         np.amax(g_and_v[0]), np.amin(g_and_v[0]),
+                        #         np.amax(g_and_v[1]), np.amin(g_and_v[1])))                        
+                        #     print('------------------------------------')
+
+                        # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
 
                         # src_loss, dst_loss = nn.tf_sess.run([model.src_loss, model.dst_loss], feed_dict={
                         #     model.warped_src :warped_src,
@@ -224,15 +234,63 @@ def trainerThread (s2c, c2s, e,
 
                         # Train GAN
                         if model.options['gan_power'] != 0:
-                            _, D_src_dst_loss = nn.tf_sess.run([model.D_src_dst_train_op, model.D_src_dst_loss], feed_dict={
+                            _, D_src_dst_loss = nn.tf_sess.run(
+                                [model.D_src_dst_train_op, model.D_src_dst_loss], feed_dict={
                                 model.warped_src :warped_src,
                                 model.target_src :target_src,
                                 model.target_srcm_all:target_srcm_all,
                                 model.warped_dst :warped_dst,
                                 model.target_dst :target_dst,
                                 model.target_dstm_all:target_dstm_all})
+
+                            # _, D_src_dst_loss, _debug_D_src_dst_loss_gvs, _gpu_D_src_dst_loss, _gpu_target_src_d, _gpu_pred_src_src_d, _gpu_target_src_x2_d, _gpu_pred_src_src_x2_d, _gpu_pred_src_src_masked_opt, _gpu_pred_src_src, _gard_ok = nn.tf_sess.run(
+                            #     [model.D_src_dst_train_op, model.D_src_dst_loss, model.debug_D_src_dst_loss_gvs, model.gpu_D_src_dst_loss,
+                            #     model.gpu_target_src_d, model.gpu_pred_src_src_d, model.gpu_target_src_x2_d, model.gpu_pred_src_src_x2_d,
+                            #     model.gpu_pred_src_src_masked_opt, model.gpu_pred_src_src, model.grad_ok], feed_dict={
+                            #     model.warped_src :warped_src,
+                            #     model.target_src :target_src,
+                            #     model.target_srcm_all:target_srcm_all,
+                            #     model.warped_dst :warped_dst,
+                            #     model.target_dst :target_dst,
+                            #     model.target_dstm_all:target_dstm_all})
+
+                            # D_src_dst_loss, _debug_D_src_dst_loss_gvs, _gpu_D_src_dst_loss, _gpu_target_src_d, _gpu_pred_src_src_d, _gpu_target_src_x2_d, _gpu_pred_src_src_x2_d, _gpu_pred_src_src_masked_opt, _gpu_pred_src_src = nn.tf_sess.run(
+                            #     [model.D_src_dst_loss, model.debug_D_src_dst_loss_gvs, model.gpu_D_src_dst_loss,
+                            #     model.gpu_target_src_d, model.gpu_pred_src_src_d, model.gpu_target_src_x2_d, model.gpu_pred_src_src_x2_d,
+                            #     model.gpu_pred_src_src_masked_opt, model.gpu_pred_src_src], feed_dict={
+                            #     model.warped_src :warped_src,
+                            #     model.target_src :target_src,
+                            #     model.target_srcm_all:target_srcm_all,
+                            #     model.warped_dst :warped_dst,
+                            #     model.target_dst :target_dst,
+                            #     model.target_dstm_all:target_dstm_all})
+
                             list_loss.append(float(D_src_dst_loss))
 
+                            # print('_gpu_target_src_d')
+                            # print(_gpu_target_src_d)
+                            # print('_gpu_pred_src_src_d')
+                            # print(_gpu_pred_src_src_d)
+                            # print('_gpu_target_src_x2_d')
+                            # print(_gpu_target_src_x2_d)
+                            # print('_gpu_pred_src_src_x2_d')
+                            # print(_gpu_pred_src_src_x2_d)
+                            # print('_gpu_D_src_dst_loss')
+                            # print(_gpu_D_src_dst_loss)
+                            # print('_gpu_pred_src_src')
+                            # print(np.isnan(_gpu_pred_src_src).any())
+                            # print(np.amax(_gpu_pred_src_src))
+                            # print(np.amin(_gpu_pred_src_src))
+                            # print(_gpu_pred_src_src_masked_opt)
+                            # print(len(_debug_D_src_dst_loss_gvs[0]))
+
+                            # print(_gard_ok)
+                            # for idx, g_and_v in enumerate(_debug_D_src_dst_loss_gvs[0]):
+                            #     print('g: max {}, min {}; v: max {}, min {}'.format(
+                            #         np.amax(g_and_v[0]), np.amin(g_and_v[0]),
+                            #         np.amax(g_and_v[1]), np.amin(g_and_v[1])))                        
+                            
+                            # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
 
                         model.loss_history.append ( list_loss )
                         model.iter += 1

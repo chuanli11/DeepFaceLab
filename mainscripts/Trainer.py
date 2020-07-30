@@ -215,7 +215,7 @@ def trainerThread (s2c, c2s, e,
 
 
 def main(**kwargs):
-    io.log_info ("Running trainer.\r\n")
+    io.log_info ("Running trainer (dfl).\r\n")
 
     no_preview = kwargs.get('no_preview', False)
 

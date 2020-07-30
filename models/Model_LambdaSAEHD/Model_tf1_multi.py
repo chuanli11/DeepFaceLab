@@ -348,6 +348,7 @@ class LambdaSAEHDModel(ModelBase):
                 lr=1e-4
                 lr_dropout = 0.3 if self.options['lr_dropout'] in ['y','cpu'] and not self.pretrain else 1.0
                 clipnorm = 1.0 if self.options['clipgrad'] else 0.0
+                clipvalue = 0.01 if self.options['clipgrad'] else 0.0
 
                 if 'df' in archi_type:
                     self.src_dst_trainable_weights = self.encoder.get_weights() + self.inter.get_weights() + self.decoder_src.get_weights() + self.decoder_dst.get_weights()
@@ -573,7 +574,16 @@ class LambdaSAEHDModel(ModelBase):
 
                         gpu_D_src_dst_losses += [gpu_D_src_dst_loss]
 
-                        gpu_D_src_dst_loss_gvs.append(self.D_src_dst_opt.compute_gradients(tf.reduce_mean(gpu_D_src_dst_loss), self.D_src_dst_trainable_weights))
+                        _gvs, _vars = zip(*self.D_src_dst_opt.compute_gradients(tf.reduce_mean(gpu_D_src_dst_loss), self.D_src_dst_trainable_weights))
+                        if clipnorm > 0:
+                            # _gvs, _ = tf.clip_by_global_norm(_gvs, clipnorm)
+                            _gvs = [tf.where(tf.is_nan(g), tf.zeros_like(g), g) for g in _gvs]
+                            _gvs = [tf.where(tf.math.is_inf(g), tf.zeros_like(g), g) for g in _gvs]
+                            _gvs, _ = tf.clip_by_global_norm(_gvs, clipnorm)
+                            _gvs = [tf.clip_by_value(g, -1.0 * clipvalue, clipvalue) for g in _gvs]                            
+                        gpu_D_src_dst_loss_gvs.append([(g, v) for g, v in zip(_gvs, _vars)])
+
+                        # gpu_D_src_dst_loss_gvs.append(self.D_src_dst_opt.compute_gradients(tf.reduce_mean(gpu_D_src_dst_loss), self.D_src_dst_trainable_weights))
 
                         gan_G_loss = 0.5*gan_power*( DLoss(gpu_pred_src_src_d_ones, gpu_pred_src_src_d) + DLoss(gpu_pred_src_src_x2_d_ones, gpu_pred_src_src_x2_d))
 
@@ -585,7 +595,17 @@ class LambdaSAEHDModel(ModelBase):
                     total_loss = tf.reduce_mean(gpu_src_loss) + tf.reduce_mean(gpu_dst_loss)
                     if gan_power != 0:
                         total_loss += tf.reduce_mean(gan_G_loss)
-                    gpu_G_loss_gvs.append(self.src_dst_opt.compute_gradients(total_loss, var_list=self.src_dst_trainable_weights))
+
+                    _gvs, _vars = zip(*self.src_dst_opt.compute_gradients(total_loss, var_list=self.src_dst_trainable_weights))
+                    if clipnorm > 0:
+                        # _gvs, _ = tf.clip_by_global_norm(_gvs, clipnorm)
+                        _gvs = [tf.where(tf.is_nan(g), tf.zeros_like(g), g) for g in _gvs]
+                        _gvs = [tf.where(tf.math.is_inf(g), tf.zeros_like(g), g) for g in _gvs]
+                        _gvs, _ = tf.clip_by_global_norm(_gvs, clipnorm)
+                        _gvs = [tf.clip_by_value(g, -1.0 * clipvalue, clipvalue) for g in _gvs]                        
+                    gpu_G_loss_gvs.append([(g, v) for g, v in zip(_gvs, _vars)])
+                    
+                    # gpu_G_loss_gvs.append(self.src_dst_opt.compute_gradients(total_loss, var_list=self.src_dst_trainable_weights))
 
 
             # Average losses and gradients, and create optimizer update ops
