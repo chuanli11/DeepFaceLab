@@ -301,7 +301,7 @@ class LambdaSAEHDModel(ModelBase):
             ret = list(zip(*new_all_grads))
             return ret
 
-        def apply_gradients(opt, grads):
+        def apply_gradients(opt, grads, global_step=None):
             # devices = get_available_gpus()
             # raw_devices = ['{}'.format(k) for k in devices]
             # optimizer using NCCL
@@ -316,7 +316,7 @@ class LambdaSAEHDModel(ModelBase):
                         # with override_to_local_variable(enable=idx > 0):
                         
                         train_ops.append(opt.apply_gradients(
-                            grad_and_vars, name='apply_grad_{}'.format(idx)))
+                            grad_and_vars, global_step=global_step, name='apply_grad_{}'.format(idx)))
 
                         # Check gradient overflow before update parameters
                         # with tf.name_scope('CheckOverflow'):
@@ -367,6 +367,10 @@ class LambdaSAEHDModel(ModelBase):
         bgr_shape = nn.get4Dshape(resolution,resolution,input_ch)
         mask_shape = nn.get4Dshape(resolution,resolution,1)
         self.model_filename_list = []
+        
+        self.global_step = tf.train.get_or_create_global_step()
+        starter_learning_rate = 0.0001
+        self.learning_rate = tf.compat.v1.train.exponential_decay(starter_learning_rate, self.global_step, 1000, 0.96, staircase=True)
 
         with tf.device ('/CPU:0'):
             #Place holders on CPU
@@ -438,7 +442,7 @@ class LambdaSAEHDModel(ModelBase):
                 elif 'liae' in archi_type:
                     self.src_dst_trainable_weights = self.encoder.get_weights() + self.inter_AB.get_weights() + self.inter_B.get_weights() + self.decoder.get_weights()
                 
-                self.src_dst_opt = tf.train.AdamOptimizer(learning_rate=lr, beta1=0.9, beta2=0.999)
+                self.src_dst_opt = tf.train.AdamOptimizer(learning_rate=self.learning_rate, beta1=0.9, beta2=0.999)
                 
                 if self.use_amp:
                     src_dst_loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
@@ -446,14 +450,14 @@ class LambdaSAEHDModel(ModelBase):
 
                 if self.options['true_face_power'] != 0:
                     self.D_code_trainable_weights = self.code_discriminator.get_weights()
-                    self.D_code_opt = tf.train.AdamOptimizer(learning_rate=lr, beta1=0.9, beta2=0.999)
+                    self.D_code_opt = tf.train.AdamOptimizer(learning_rate=self.learning_rate, beta1=0.9, beta2=0.999)
                     if self.use_amp:
                         D_code_loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
                         self.D_code_opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(self.D_code_opt, loss_scale=D_code_loss_scale)
 
                 if gan_power != 0:
                     self.D_src_dst_trainable_weights = self.D_src.get_weights()+self.D_src_x2.get_weights()
-                    self.D_src_dst_opt = tf.train.AdamOptimizer(learning_rate=lr, beta1=0.9, beta2=0.999)
+                    self.D_src_dst_opt = tf.train.AdamOptimizer(learning_rate=self.learning_rate, beta1=0.9, beta2=0.999)
                     if self.use_amp:
                         D_src_dst_loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
                         self.D_src_dst_opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(self.D_src_dst_opt, loss_scale=D_src_dst_loss_scale)                    
@@ -671,16 +675,9 @@ class LambdaSAEHDModel(ModelBase):
                                              (DLoss(gpu_target_src_x2_d_ones   , gpu_target_src_x2_d) + \
                                               DLoss(gpu_pred_src_src_x2_d_zeros, gpu_pred_src_src_x2_d) ) * 0.5
 
-
-                        # self.gpu_target_src_d = gpu_target_src_d
-                        # self.gpu_pred_src_src_d = gpu_pred_src_src_d
-                        # self.gpu_target_src_x2_d = gpu_target_src_x2_d
-                        # self.gpu_pred_src_src_x2_d = gpu_pred_src_src_x2_d
-
                         if nn.floatx == 'float16':
                             gpu_D_src_dst_loss = tf.cast(gpu_D_src_dst_loss, tf.float32)
                         
-
                         gpu_D_src_dst_losses += [gpu_D_src_dst_loss]
 
                         _gvs, _vars = zip(*self.D_src_dst_opt.compute_gradients(tf.reduce_mean(gpu_D_src_dst_loss), self.D_src_dst_trainable_weights))
@@ -692,13 +689,10 @@ class LambdaSAEHDModel(ModelBase):
 
                         gpu_D_src_dst_loss_gvs.append([(g, v) for g, v in zip(_gvs, _vars)])
 
-                        # gpu_D_src_dst_loss_gvs.append(self.D_src_dst_opt.compute_gradients(tf.reduce_mean(gpu_D_src_dst_loss), self.D_src_dst_trainable_weights))
-
                         gan_G_loss = 0.5*gan_power*( DLoss(gpu_pred_src_src_d_ones, gpu_pred_src_src_d) + DLoss(gpu_pred_src_src_x2_d_ones, gpu_pred_src_src_x2_d))
 
                         if nn.floatx == 'float16':
                             gan_G_loss = tf.cast(gan_G_loss, tf.float32)
-
 
                     # Per GPU gradient -----------------------------------------
                     total_loss = tf.reduce_mean(gpu_src_loss) + tf.reduce_mean(gpu_dst_loss)
@@ -721,7 +715,7 @@ class LambdaSAEHDModel(ModelBase):
             all_G_grads, all_G_vars = split_grad_list(gpu_G_loss_gvs)
             all_G_grads = allreduce_grads(all_G_grads)
             gpu_G_loss_gvs = merge_grad_list(all_G_grads, all_G_vars)
-            self.G_train_op = apply_gradients(self.src_dst_opt, gpu_G_loss_gvs)
+            self.G_train_op = apply_gradients(self.src_dst_opt, gpu_G_loss_gvs, self.global_step)
 
             if gan_power != 0:
                 # self.debug_D_src_dst_loss_gvs = gpu_D_src_dst_loss_gvs
@@ -753,58 +747,6 @@ class LambdaSAEHDModel(ModelBase):
 
                 if self.options['true_face_power'] != 0:
                     self.D_code_loss = tf.reduce_mean(tf.concat(gpu_D_code_losses, 0))
-
-                # print('----------------------------------------------------------------------')
-                # print(gpu_src_losses)
-                # print('----------------------------------------------------------------------')
-                # print(gpu_dst_losses)
-                # print('----------------------------------------------------------------------')
-                # print(gpu_G_loss_gvs)
-                # print(len(gpu_G_loss_gvs))
-                # print(len(gpu_G_loss_gvs[0]))
-                # print(len(gpu_G_loss_gvs[1]))
-                # print('----------------------------------------------------------------------')
-                # print(tower_grads)
-                # print(len(tower_grads))
-                # print('----------------------------------------------------------------------')
-                # print(self.train_op)
-
-                # if self.options['true_face_power'] != 0:
-                #     D_loss_gv_op = self.D_code_opt.get_update_op (nn.average_gv_list(gpu_D_code_loss_gvs))
-
-                # if gan_power != 0:
-                #     src_D_src_dst_loss_gv_op = self.D_src_dst_opt.get_update_op (nn.average_gv_list(gpu_D_src_dst_loss_gvs) )
-
-            # # Initializing training and view functions
-            # def src_dst_train(warped_src, target_src, target_srcm_all, \
-            #                   warped_dst, target_dst, target_dstm_all):
-            #     s, d, _ = nn.tf_sess.run ( [ src_loss, dst_loss, src_dst_loss_gv_op],
-            #                                 feed_dict={self.warped_src :warped_src,
-            #                                            self.target_src :target_src,
-            #                                            self.target_srcm_all:target_srcm_all,
-            #                                            self.warped_dst :warped_dst,
-            #                                            self.target_dst :target_dst,
-            #                                            self.target_dstm_all:target_dstm_all,
-            #                                            })
-            #     return s, d
-            # self.src_dst_train = src_dst_train
-
-            # if self.options['true_face_power'] != 0:
-            #     def D_train(warped_src, warped_dst):
-            #         nn.tf_sess.run ([D_loss_gv_op], feed_dict={self.warped_src: warped_src, self.warped_dst: warped_dst})
-            #     self.D_train = D_train
-
-            # if gan_power != 0:
-            #     def D_src_dst_train(warped_src, target_src, target_srcm_all, \
-            #                         warped_dst, target_dst, target_dstm_all):
-            #         nn.tf_sess.run ([src_D_src_dst_loss_gv_op], feed_dict={self.warped_src :warped_src,
-            #                                                                self.target_src :target_src,
-            #                                                                self.target_srcm_all:target_srcm_all,
-            #                                                                self.warped_dst :warped_dst,
-            #                                                                self.target_dst :target_dst,
-            #                                                                self.target_dstm_all:target_dstm_all})
-            #     self.D_src_dst_train = D_src_dst_train
-
 
             def AE_view(warped_src, warped_dst):
                 return nn.tf_sess.run ( [pred_src_src, pred_dst_dst, pred_dst_dstm, pred_src_dst, pred_src_dstm],

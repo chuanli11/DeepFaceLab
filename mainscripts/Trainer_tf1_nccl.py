@@ -110,31 +110,7 @@ def trainerThread (s2c, c2s, e,
             execute_programs = [ [x[0], x[1], time.time() ] for x in execute_programs ]
 
             tf = nn.tf
-            # global_step = tf.train.get_or_create_global_step()
-            # nn.tf_sess.run(global_step.initializer)
 
-            # # Auto-encoder
-            # optimizer_G = tf.train.AdamOptimizer(learning_rate=0.0001, beta1=0.9, beta2=0.999)
-            # if use_amp:
-            #     loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
-            #     optimizer_G = tf.train.experimental.enable_mixed_precision_graph_rewrite(optimizer_G, loss_scale=loss_scale)
-
-            
-            # src_dst_update_op = optimizer_G.minimize(model.G_loss, global_step=global_step, var_list=model.src_dst_trainable_weights)
-
-            # True face 
-            # if model.options['true_face_power'] != 0:
-            #     D_code_update_op  = optimizer.minimize(model.D_code_loss, global_step=global_step, var_list=model.D_code_trainable_weights)
-
-            # # GAN
-            # if model.options['gan_power'] != 0:
-            #     optimizer_D_src_dst = tf.train.AdamOptimizer(learning_rate=0.0001, beta1=0.9, beta2=0.999)
-            #     if use_amp:
-            #         loss_scale_D_src_dst = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
-            #         optimizer_D_src_dst = tf.train.experimental.enable_mixed_precision_graph_rewrite(optimizer_D_src_dst, loss_scale=loss_scale_D_src_dst)
-
-            #     D_src_dst_update_op = optimizer_D_src_dst.minimize(model.D_src_dst_loss, global_step=global_step, var_list=model.D_src_dst_trainable_weights)
-                
             list_globals_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
             print('initializing variables ... ')
             list_init = []
@@ -143,6 +119,7 @@ def trainerThread (s2c, c2s, e,
                     if not nn.tf_sess.run(nn.tf.is_variable_initialized(x)):
                         list_init.append(x)
             nn.tf_sess.run(tf.variables_initializer(list_init))
+            nn.tf_sess.run(model.global_step.initializer)
             print('done ')
 
             # ( (warped_src, target_src, target_srcm_all), \
@@ -182,46 +159,18 @@ def trainerThread (s2c, c2s, e,
                         list_loss = []
 
                         # Train auto-encoder
-                        _, src_loss, dst_loss = nn.tf_sess.run(
-                            [model.G_train_op, model.src_loss, model.dst_loss], feed_dict={
+                        _, src_loss, dst_loss, learning_rate = nn.tf_sess.run(
+                            [model.G_train_op, model.src_loss, model.dst_loss, model.learning_rate], feed_dict={
                             model.warped_src :warped_src,
                             model.target_src :target_src,
                             model.target_srcm_all:target_srcm_all,
                             model.warped_dst :warped_dst,
                             model.target_dst :target_dst,
                             model.target_dstm_all:target_dstm_all})
-                        list_loss = [float(src_loss), float(dst_loss)]
-
-                        # print(len(_debug_gpu_G_loss_gvs[0]))
-                        # for idx, g_and_v in enumerate(_debug_gpu_G_loss_gvs[0]):
-                        #     print('g: max {}, min {}; v: max {}, min {}'.format(
-                        #         np.amax(g_and_v[0]), np.amin(g_and_v[0]),
-                        #         np.amax(g_and_v[1]), np.amin(g_and_v[1])))                        
-                        #     print('------------------------------------')
-
-                        # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-
-                        # src_loss, dst_loss = nn.tf_sess.run([model.src_loss, model.dst_loss], feed_dict={
-                        #     model.warped_src :warped_src,
-                        #     model.target_src :target_src,
-                        #     model.target_srcm_all:target_srcm_all,
-                        #     model.warped_dst :warped_dst,
-                        #     model.target_dst :target_dst,
-                        #     model.target_dstm_all:target_dstm_all})
-                        # print(src_loss)
-                        # print(dst_loss)
-                        # list_loss = []
-                        # list_loss = [np.mean(float(src_loss)), np.mean(float(dst_loss))]
+                        list_loss = [learning_rate, float(src_loss), float(dst_loss)]
 
                         # # Train face style
                         if model.options['true_face_power'] != 0:
-                        #     # D_code_loss = nn.tf_sess.run(model.D_code_loss, feed_dict={
-                        #     # model.warped_src :warped_src,
-                        #     # model.warped_dst :warped_dst})                            
-                        #     # _, D_code_loss = nn.tf_sess.run([D_code_update_op, model.D_code_loss], feed_dict={
-                        #     # model.warped_src :warped_src,
-                        #     # model.warped_dst :warped_dst})
-
                             _, D_code_loss = nn.tf_sess.run(
                                 [model.D_code_train_op, model.D_code_loss], feed_dict={
                                 model.warped_src :warped_src,
@@ -243,54 +192,8 @@ def trainerThread (s2c, c2s, e,
                                 model.target_dst :target_dst,
                                 model.target_dstm_all:target_dstm_all})
 
-                            # _, D_src_dst_loss, _debug_D_src_dst_loss_gvs, _gpu_D_src_dst_loss, _gpu_target_src_d, _gpu_pred_src_src_d, _gpu_target_src_x2_d, _gpu_pred_src_src_x2_d, _gpu_pred_src_src_masked_opt, _gpu_pred_src_src, _gard_ok = nn.tf_sess.run(
-                            #     [model.D_src_dst_train_op, model.D_src_dst_loss, model.debug_D_src_dst_loss_gvs, model.gpu_D_src_dst_loss,
-                            #     model.gpu_target_src_d, model.gpu_pred_src_src_d, model.gpu_target_src_x2_d, model.gpu_pred_src_src_x2_d,
-                            #     model.gpu_pred_src_src_masked_opt, model.gpu_pred_src_src, model.grad_ok], feed_dict={
-                            #     model.warped_src :warped_src,
-                            #     model.target_src :target_src,
-                            #     model.target_srcm_all:target_srcm_all,
-                            #     model.warped_dst :warped_dst,
-                            #     model.target_dst :target_dst,
-                            #     model.target_dstm_all:target_dstm_all})
-
-                            # D_src_dst_loss, _debug_D_src_dst_loss_gvs, _gpu_D_src_dst_loss, _gpu_target_src_d, _gpu_pred_src_src_d, _gpu_target_src_x2_d, _gpu_pred_src_src_x2_d, _gpu_pred_src_src_masked_opt, _gpu_pred_src_src = nn.tf_sess.run(
-                            #     [model.D_src_dst_loss, model.debug_D_src_dst_loss_gvs, model.gpu_D_src_dst_loss,
-                            #     model.gpu_target_src_d, model.gpu_pred_src_src_d, model.gpu_target_src_x2_d, model.gpu_pred_src_src_x2_d,
-                            #     model.gpu_pred_src_src_masked_opt, model.gpu_pred_src_src], feed_dict={
-                            #     model.warped_src :warped_src,
-                            #     model.target_src :target_src,
-                            #     model.target_srcm_all:target_srcm_all,
-                            #     model.warped_dst :warped_dst,
-                            #     model.target_dst :target_dst,
-                            #     model.target_dstm_all:target_dstm_all})
-
                             list_loss.append(float(D_src_dst_loss))
 
-                            # print('_gpu_target_src_d')
-                            # print(_gpu_target_src_d)
-                            # print('_gpu_pred_src_src_d')
-                            # print(_gpu_pred_src_src_d)
-                            # print('_gpu_target_src_x2_d')
-                            # print(_gpu_target_src_x2_d)
-                            # print('_gpu_pred_src_src_x2_d')
-                            # print(_gpu_pred_src_src_x2_d)
-                            # print('_gpu_D_src_dst_loss')
-                            # print(_gpu_D_src_dst_loss)
-                            # print('_gpu_pred_src_src')
-                            # print(np.isnan(_gpu_pred_src_src).any())
-                            # print(np.amax(_gpu_pred_src_src))
-                            # print(np.amin(_gpu_pred_src_src))
-                            # print(_gpu_pred_src_src_masked_opt)
-                            # print(len(_debug_D_src_dst_loss_gvs[0]))
-
-                            # print(_gard_ok)
-                            # for idx, g_and_v in enumerate(_debug_D_src_dst_loss_gvs[0]):
-                            #     print('g: max {}, min {}; v: max {}, min {}'.format(
-                            #         np.amax(g_and_v[0]), np.amin(g_and_v[0]),
-                            #         np.amax(g_and_v[1]), np.amin(g_and_v[1])))                        
-                            
-                            # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
 
                         model.loss_history.append ( list_loss )
                         model.iter += 1
@@ -337,14 +240,14 @@ def trainerThread (s2c, c2s, e,
                             mean_loss = np.mean ( loss_history[save_iter:iter], axis=0)
 
                             for loss_value in mean_loss:
-                                loss_string += "[%.4f]" % (loss_value)
+                                loss_string += "[%.5f]" % (loss_value)
 
                             io.log_info (loss_string)
 
                             save_iter = iter
                         else:
                             for loss_value in loss_history[-1]:
-                                loss_string += "[%.4f]" % (loss_value)
+                                loss_string += "[%.5f]" % (loss_value)
 
                             if io.is_colab():
                                 io.log_info ('\r' + loss_string, end='')
