@@ -8,6 +8,9 @@ AMP=${6:-off}
 BS_PER_GPU=${7:-1}
 LOG_DIR=${8:-log_20200715}
 API=${9:-dfl}
+OPT=${10:-adam}
+LR=${11:-0.0001}
+DECAY_STEP=${12:-1000}
 
 GPU_NAME="$(nvidia-smi -i 0 --query-gpu=gpu_name --format=csv,noheader | sed 's/ //g' 2>/dev/null || echo PLACEHOLDER )"
 MONITOR_INTERVAL=0.1
@@ -49,7 +52,10 @@ for idx in $GPU_IDXS; do
         --target-iter ${TARGET_ITER} \
         --precision ${PRECISION} \
         --bs-per-gpu ${BS_PER_GPU} \
-        --api ${API}"
+        --api ${API} \
+        --opt ${OPT} \
+        --lr ${LR} \
+        --decay-step ${DECAY_STEP}"
 
         if [ "$AMP" == "on" ]; then
             command_para="${command_para} --use-amp"

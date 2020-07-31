@@ -39,6 +39,9 @@ class ModelBase(object):
                        precision=None,
                        bs_per_gpu=None,
                        use_amp=False,
+                       opt='dfl',
+                       lr=0.0001,
+                       decay_step=1000,
                        **kwargs):
         self.is_training = is_training
         self.saved_models_path = saved_models_path
@@ -53,7 +56,9 @@ class ModelBase(object):
         self.precision=precision
         self.bs_per_gpu=bs_per_gpu
         self.use_amp=use_amp
-
+        self.opt=opt
+        self.lr=lr
+        self.decay_step=decay_step
         self.model_class_name = model_class_name = Path(inspect.getmodule(self).__file__).parent.name.rsplit("_", 1)[1]
 
         if force_model_class_name is None:
@@ -225,6 +230,10 @@ class ModelBase(object):
                     self.autobackups_path.mkdir(exist_ok=True)
 
         self.options['use_amp'] = self.use_amp
+        self.options['opt'] = self.opt
+        self.options['lr'] = self.lr
+        self.options['decay_step'] = self.decay_step
+        
         io.log_info( self.get_summary_text() )
 
     def update_sample_for_preview(self, choose_preview_history=False, force_new=False):

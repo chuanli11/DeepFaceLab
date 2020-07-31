@@ -220,6 +220,11 @@ class LambdaSAEHDModel(ModelBase):
         nn.initialize(floatx=self.options['precision'], data_format=self.model_data_format, use_amp=self.use_amp)
         tf = nn.tf
 
+        if self.opt == 'adam':
+            self.optimizer = tf.train.AdamOptimizer
+        elif self.opt == 'rmsprop':
+            self.optimizer = tf.train.RMSPropOptimizer
+
         def average_gradients(tower_grads):
             average_grads = []
             for grad_and_vars in zip(*tower_grads):
@@ -286,8 +291,7 @@ class LambdaSAEHDModel(ModelBase):
         self.model_filename_list = []
 
         self.global_step = tf.train.get_or_create_global_step()
-        starter_learning_rate = 0.0001
-        self.learning_rate = tf.compat.v1.train.exponential_decay(starter_learning_rate, self.global_step, 1000, 0.96, staircase=True)
+        self.learning_rate = tf.compat.v1.train.exponential_decay(self.lr, self.global_step, self.decay_step, 0.96, staircase=True)
 
         with tf.device ('/CPU:0'):
             #Place holders on CPU
@@ -359,7 +363,7 @@ class LambdaSAEHDModel(ModelBase):
                 elif 'liae' in archi_type:
                     self.src_dst_trainable_weights = self.encoder.get_weights() + self.inter_AB.get_weights() + self.inter_B.get_weights() + self.decoder.get_weights()
                 
-                self.src_dst_opt = tf.train.AdamOptimizer(learning_rate=self.learning_rate, beta1=0.9, beta2=0.999)
+                self.src_dst_opt = self.optimizer(learning_rate=self.learning_rate)
 
                 if self.use_amp:
                     src_dst_loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
@@ -367,14 +371,14 @@ class LambdaSAEHDModel(ModelBase):
 
                 if self.options['true_face_power'] != 0:
                     self.D_code_trainable_weights = self.code_discriminator.get_weights()
-                    self.D_code_opt = tf.train.AdamOptimizer(learning_rate=self.learning_rate, beta1=0.9, beta2=0.999)
+                    self.D_code_opt = self.optimizer(learning_rate=self.learning_rate)
                     if self.use_amp:
                         D_code_loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
                         self.D_code_opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(self.D_code_opt, loss_scale=D_code_loss_scale)
 
                 if gan_power != 0:
                     self.D_src_dst_trainable_weights = self.D_src.get_weights()+self.D_src_x2.get_weights()
-                    self.D_src_dst_opt = tf.train.AdamOptimizer(learning_rate=self.learning_rate, beta1=0.9, beta2=0.999)
+                    self.D_src_dst_opt = self.optimizer(learning_rate=self.learning_rate)
                     if self.use_amp:
                         D_src_dst_loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
                         self.D_src_dst_opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(self.D_src_dst_opt, loss_scale=D_src_dst_loss_scale)                    

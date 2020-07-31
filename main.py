@@ -131,7 +131,10 @@ if __name__ == "__main__":
                   'target_iter'              : arguments.target_iter,
                   'precision'                : arguments.precision,
                   'bs_per_gpu'               : arguments.bs_per_gpu,
-                  'use_amp'                  : arguments.use_amp
+                  'use_amp'                  : arguments.use_amp,
+                  'opt'                      : arguments.opt,
+                  'lr'                       : arguments.lr,
+                  'decay_step'               : arguments.decay_step
                   }
 
         if arguments.api == 'dfl':
@@ -168,7 +171,10 @@ if __name__ == "__main__":
     p.add_argument('--precision', dest="precision", default='float32', help="Precision for training")
     p.add_argument('--bs-per-gpu', dest="bs_per_gpu", default=1, help="Batch size per GPU")
     p.add_argument('--use-amp', action="store_true", dest="use_amp", default=False, help="Use automatic mixed precision.")
-    p.add_argument('--api', required=True, dest="api", choices=['dfl', 'tf1', 'tf1-multi', 'tf1-nccl'], help="API for training.")
+    p.add_argument('--api', dest="api",  default='dfl', choices=['dfl', 'tf1', 'tf1-multi', 'tf1-nccl'], help="API for training.")
+    p.add_argument('--opt', dest="opt", default='adam', choices=['adam', 'rmsprop'], help="options for optimizer")
+    p.add_argument('--lr', dest="lr", type=float, default=0.0001, help="Start learning rate")
+    p.add_argument('--decay-step', dest="decay_step", type=int, default=1000, help="number of steps for learning rate decay")
     p.add_argument('--execute-program', dest="execute_program", default=[], action='append', nargs='+')
     p.set_defaults (func=process_train)
 

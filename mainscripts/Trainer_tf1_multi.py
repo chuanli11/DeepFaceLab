@@ -36,6 +36,9 @@ def trainerThread (s2c, c2s, e,
                     precision=None,
                     bs_per_gpu=None,
                     use_amp=None,
+                    opt=None,
+                    lr=None,
+                    decay_step=None,
                     **kwargs):
     while True:
         try:
@@ -70,9 +73,12 @@ def trainerThread (s2c, c2s, e,
                         target_iter=target_iter,
                         precision=precision,
                         bs_per_gpu=bs_per_gpu,
-                        use_amp=use_amp
+                        use_amp=use_amp,
+                        opt=opt,
+                        lr=lr,
+                        decay_step=decay_step
                         )
-            
+
             is_reached_goal = model.is_reached_iter_goal()
 
             shared_state = { 'after_save' : False }
