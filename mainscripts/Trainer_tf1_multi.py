@@ -203,24 +203,16 @@ def trainerThread (s2c, c2s, e,
                         # list_loss = []
                         # list_loss = [np.mean(float(src_loss)), np.mean(float(dst_loss))]
 
-                        # # # Train face style
-                        # if model.options['true_face_power'] != 0:
-                        #     # D_code_loss = nn.tf_sess.run(model.D_code_loss, feed_dict={
-                        #     # model.warped_src :warped_src,
-                        #     # model.warped_dst :warped_dst})                            
-                        #     # _, D_code_loss = nn.tf_sess.run([D_code_update_op, model.D_code_loss], feed_dict={
-                        #     # model.warped_src :warped_src,
-                        #     # model.warped_dst :warped_dst})
-
-                        #     _, D_code_loss, _gpu_dst_code_d = nn.tf_sess.run([D_code_update_op, model.D_code_loss, model.gpu_dst_code_d], feed_dict={
-                        #         model.warped_src :warped_src,
-                        #         model.target_src :target_src,
-                        #         model.target_srcm_all:target_srcm_all,
-                        #         model.warped_dst :warped_dst,
-                        #         model.target_dst :target_dst,
-                        #         model.target_dstm_all:target_dstm_all})
-                        #     print(_gpu_dst_code_d)
-                        #     list_loss.append(float(D_code_loss))
+                        # Train face style
+                        if model.options['true_face_power'] != 0:
+                            _, _D_code_loss = nn.tf_sess.run([model.D_code_train_op, model.D_code_loss], feed_dict={
+                                model.warped_src :warped_src,
+                                model.target_src :target_src,
+                                model.target_srcm_all:target_srcm_all,
+                                model.warped_dst :warped_dst,
+                                model.target_dst :target_dst,
+                                model.target_dstm_all:target_dstm_all})
+                            list_loss.append(float(_D_code_loss))
 
                         # Train GAN
                         if model.options['gan_power'] != 0:

@@ -3,5 +3,5 @@ CONFIGS="\
 LambdaSAEHD_mini \
 "
 
-GPU_IDXS="0,1"
+GPU_IDXS="0"
 
