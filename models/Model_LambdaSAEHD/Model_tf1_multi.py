@@ -356,6 +356,7 @@ class LambdaSAEHDModel(ModelBase):
                     self.src_dst_trainable_weights = self.encoder.get_weights() + self.inter_AB.get_weights() + self.inter_B.get_weights() + self.decoder.get_weights()
                 
                 self.src_dst_opt = tf.train.AdamOptimizer(learning_rate=lr, beta1=0.9, beta2=0.999)
+                
                 if self.use_amp:
                     src_dst_loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
                     self.src_dst_opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(self.src_dst_opt, loss_scale=src_dst_loss_scale)

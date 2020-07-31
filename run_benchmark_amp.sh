@@ -12,7 +12,7 @@ API=${8:-dfl}
 
 wait $! 
 
-./benchmark.sh benchmark/config/config_${CONFIG} $NUM_STEPS $SRC_PATH $DST_PATH float32 off $BS_PER_GPU_FP32 $LOG_PATH tf1-multi
+./benchmark.sh benchmark/config/config_${CONFIG} $NUM_STEPS $SRC_PATH $DST_PATH float32 off $BS_PER_GPU_FP32 $LOG_PATH tf1-nccl
 
 # wait $! 
 
