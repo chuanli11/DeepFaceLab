@@ -15,7 +15,7 @@ DECAY_STEP=${11:-1000}
 
 wait $! 
 
-./benchmark.sh benchmark/config/config_${CONFIG} $NUM_STEPS $SRC_PATH $DST_PATH float32 on $BS_PER_GPU_FP32 $LOG_PATH tf1-multi adam 0.0001 1000
+./benchmark.sh benchmark/config/config_${CONFIG} $NUM_STEPS $SRC_PATH $DST_PATH float32 on $BS_PER_GPU_FP32 $LOG_PATH dfl adam 0.0001 1000
 
 # wait $! 
 

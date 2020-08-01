@@ -325,6 +325,7 @@ class LambdaSAEHDModel(ModelBase):
                 lr=5e-5
                 lr_dropout = 0.3 if self.options['lr_dropout'] in ['y','cpu'] and not self.pretrain else 1.0
                 clipnorm = 1.0 if self.options['clipgrad'] else 0.0
+                clipvalue = 0.01 if self.options['clipgrad'] else 0.0
 
                 if 'df' in archi_type:
                     self.src_dst_trainable_weights = self.encoder.get_weights() + self.inter.get_weights() + self.decoder_src.get_weights() + self.decoder_dst.get_weights()
@@ -513,8 +514,14 @@ class LambdaSAEHDModel(ModelBase):
                         gpu_D_code_loss = (DLoss(gpu_src_code_d_ones , gpu_dst_code_d) + \
                                            DLoss(gpu_src_code_d_zeros, gpu_src_code_d) ) * 0.5
 
-                        gpu_D_code_loss_gvs += [ [(g / loss_scaler_b, v) for g, v in nn.gradients (gpu_D_code_loss * loss_scaler_f, self.code_discriminator.get_weights() )] ]
-                        #gpu_D_code_loss_gvs += [ nn.gradients (gpu_D_code_loss, self.code_discriminator.get_weights() ) ]
+                        # gpu_D_code_loss_gvs += [ [(g / loss_scaler_b, v) for g, v in nn.gradients (gpu_D_code_loss * loss_scaler_f, self.code_discriminator.get_weights() )] ]
+                        _gvs, _vars = zip(*nn.gradients (gpu_D_code_loss * loss_scaler_f, self.code_discriminator.get_weights()))
+                        if clipnorm > 0:
+                            _gvs = [tf.where(tf.is_nan(g), tf.zeros_like(g), g) for g in _gvs]
+                            _gvs = [tf.where(tf.math.is_inf(g), tf.zeros_like(g), g) for g in _gvs]
+                            _gvs, _ = tf.clip_by_global_norm(_gvs, clipnorm)
+                            _gvs = [tf.clip_by_value(g, -1.0 * clipvalue, clipvalue) for g in _gvs]                            
+                        gpu_D_code_loss_gvs.append([(g, v) for g, v in zip(_gvs, _vars)])
 
                     if gan_power != 0:
                         if nn.floatx == 'float16':
@@ -540,8 +547,14 @@ class LambdaSAEHDModel(ModelBase):
 
                         if nn.floatx == 'float16':
                             gpu_D_src_dst_loss = tf.cast(gpu_D_src_dst_loss, tf.float32)
-                        gpu_D_src_dst_loss_gvs += [[ (g / loss_scaler_b, v) for g, v in nn.gradients (gpu_D_src_dst_loss * loss_scaler_f, self.D_src.get_weights()+self.D_src_x2.get_weights() ) ]]
-                        #gpu_D_src_dst_loss_gvs += [ nn.gradients (gpu_D_src_dst_loss, self.D_src.get_weights()+self.D_src_x2.get_weights() ) ]
+                        # gpu_D_src_dst_loss_gvs += [[ (g / loss_scaler_b, v) for g, v in nn.gradients (gpu_D_src_dst_loss * loss_scaler_f, self.D_src.get_weights()+self.D_src_x2.get_weights() ) ]]
+                        _gvs, _vars = zip(*nn.gradients(gpu_D_src_dst_loss * loss_scaler_f, self.D_src.get_weights()+self.D_src_x2.get_weights()))
+                        if clipnorm > 0:
+                            _gvs = [tf.where(tf.is_nan(g), tf.zeros_like(g), g) for g in _gvs]
+                            _gvs = [tf.where(tf.math.is_inf(g), tf.zeros_like(g), g) for g in _gvs]
+                            _gvs, _ = tf.clip_by_global_norm(_gvs, clipnorm)
+                            _gvs = [tf.clip_by_value(g, -1.0 * clipvalue, clipvalue) for g in _gvs]                            
+                        gpu_D_src_dst_loss_gvs.append([(g, v) for g, v in zip(_gvs, _vars)])                        
 
                         gan_G_loss = 0.5*gan_power*( DLoss(gpu_pred_src_src_d_ones, gpu_pred_src_src_d) + DLoss(gpu_pred_src_src_x2_d_ones, gpu_pred_src_src_x2_d))
 
@@ -550,8 +563,14 @@ class LambdaSAEHDModel(ModelBase):
 
                         gpu_G_loss += gan_G_loss
 
-                    gpu_G_loss_gvs += [[ (g / loss_scaler_b, v) for g, v in nn.gradients ( gpu_G_loss * loss_scaler_f, self.src_dst_trainable_weights) ]]
-                    #gpu_G_loss_gvs += [ nn.gradients ( gpu_G_loss, self.src_dst_trainable_weights ) ]
+                    # gpu_G_loss_gvs += [[ (g / loss_scaler_b, v) for g, v in nn.gradients ( gpu_G_loss * loss_scaler_f, self.src_dst_trainable_weights) ]]
+                    _gvs, _vars = zip(*nn.gradients ( gpu_G_loss * loss_scaler_f, self.src_dst_trainable_weights))
+                    if clipnorm > 0:
+                        _gvs = [tf.where(tf.is_nan(g), tf.zeros_like(g), g) for g in _gvs]
+                        _gvs = [tf.where(tf.math.is_inf(g), tf.zeros_like(g), g) for g in _gvs]
+                        _gvs, _ = tf.clip_by_global_norm(_gvs, clipnorm)
+                        _gvs = [tf.clip_by_value(g, -1.0 * clipvalue, clipvalue) for g in _gvs]                            
+                    gpu_G_loss_gvs.append([(g, v) for g, v in zip(_gvs, _vars)])
                 
 
             # Average losses and gradients, and create optimizer update ops
