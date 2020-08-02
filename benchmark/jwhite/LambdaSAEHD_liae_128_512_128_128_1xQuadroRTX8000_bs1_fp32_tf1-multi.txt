@@ -1,0 +1,6 @@
+Running trainer TF1 MultiGPU.
+
+
+Model first run.
+Model_tf1_multi is used ---------------------------
+Initializing models:   0%|          | 0/4 [00:00<?, ?it/s]

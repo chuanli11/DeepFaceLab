@@ -22,5 +22,5 @@ true_face_power: 0.0
 face_style_power: 0.0
 bg_style_power: 0.0
 ct_mode: none
-clipgrad: False
+clipgrad: True
 pretrain: False

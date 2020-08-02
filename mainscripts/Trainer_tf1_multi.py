@@ -79,6 +79,12 @@ def trainerThread (s2c, c2s, e,
                         decay_step=decay_step
                         )
 
+            # tf = nn.tf
+            # for n in tf.get_default_graph().as_graph_def().node:
+            #     print(n)
+
+            # sys.exit()
+
             is_reached_goal = model.is_reached_iter_goal()
 
             shared_state = { 'after_save' : False }
@@ -126,6 +132,7 @@ def trainerThread (s2c, c2s, e,
                         list_init.append(x)
             nn.tf_sess.run(tf.variables_initializer(list_init))
             nn.tf_sess.run(model.global_step.initializer)
+            run_opts = tf.RunOptions(report_tensor_allocations_upon_oom = False)
             print('done ')
 
             # ( (warped_src, target_src, target_srcm_all), \
@@ -169,6 +176,17 @@ def trainerThread (s2c, c2s, e,
                         # Train different parts of the network in sequence
                         # More accurate gradient, Slower
                         if True:
+                            # _gpu_G_loss_gvs, src_loss, dst_loss = nn.tf_sess.run(
+                            #     [model.gpu_G_loss_gvs, model.src_loss, model.dst_loss], feed_dict={
+                            #     model.warped_src :warped_src,
+                            #     model.target_src :target_src,
+                            #     model.target_srcm_all:target_srcm_all,
+                            #     model.warped_dst :warped_dst,
+                            #     model.target_dst :target_dst,
+                            #     model.target_dstm_all:target_dstm_all},
+                            #     options=run_opts)
+                            # list_loss = [float(src_loss), float(dst_loss)]
+
                             _, src_loss, dst_loss, learning_rate = nn.tf_sess.run([model.G_train_op, model.src_loss, model.dst_loss, model.learning_rate], feed_dict={
                                 model.warped_src :warped_src,
                                 model.target_src :target_src,

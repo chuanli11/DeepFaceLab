@@ -217,13 +217,47 @@ class LambdaSAEHDModel(ModelBase):
         device_config = nn.getCurrentDeviceConfig()
         devices = device_config.devices
         self.model_data_format = "NCHW" if len(devices) != 0 and not self.is_debug() else "NHWC"
-        nn.initialize(floatx=self.options['precision'], data_format=self.model_data_format, use_amp=self.use_amp)
-        tf = nn.tf
+
+        models_opt_on_gpu = False if len(devices) == 0 else self.options['models_opt_on_gpu']
+        models_opt_device = '/GPU:0' if models_opt_on_gpu and self.is_training else '/CPU:0'
+        optimizer_vars_on_cpu = models_opt_device=='/CPU:0'
+
+        import tensorflow as tf
+        self.pretrain = self.options['pretrain']
+        self.global_step = tf.train.get_or_create_global_step()
+        self.learning_rate = tf.compat.v1.train.exponential_decay(self.lr, self.global_step, self.decay_step, 0.96, staircase=True)
+        self.gan_power = gan_power = self.options['gan_power'] if not self.pretrain else 0.0
 
         if self.opt == 'adam':
             self.optimizer = tf.train.AdamOptimizer
         elif self.opt == 'rmsprop':
             self.optimizer = tf.train.RMSPropOptimizer
+
+        with tf.device (models_opt_device):
+            self.src_dst_opt = self.optimizer(learning_rate=self.learning_rate)
+
+            if self.use_amp:
+                src_dst_loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
+                self.src_dst_opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(self.src_dst_opt, loss_scale=src_dst_loss_scale)
+                # pass
+
+            if self.options['true_face_power'] != 0:
+                self.D_code_trainable_weights = self.code_discriminator.get_weights()
+                self.D_code_opt = self.optimizer(learning_rate=self.learning_rate)
+                if self.use_amp:
+                    D_code_loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
+                    self.D_code_opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(self.D_code_opt, loss_scale=D_code_loss_scale)
+                    # pass
+
+            if gan_power != 0:
+                self.D_src_dst_trainable_weights = self.D_src.get_weights()+self.D_src_x2.get_weights()
+                self.D_src_dst_opt = self.optimizer(learning_rate=self.learning_rate)
+                if self.use_amp:
+                    D_src_dst_loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
+                    self.D_src_dst_opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(self.D_src_dst_opt, loss_scale=D_src_dst_loss_scale)
+
+        nn.initialize(floatx=self.options['precision'], data_format=self.model_data_format, use_amp=self.use_amp)
+        tf = nn.tf
 
         def average_gradients(tower_grads):
             
@@ -274,28 +308,24 @@ class LambdaSAEHDModel(ModelBase):
         e_dims = self.options['e_dims']
         d_dims = self.options['d_dims']
         d_mask_dims = self.options['d_mask_dims']
-        self.pretrain = self.options['pretrain']
+        
         if self.pretrain_just_disabled:
             self.set_iter(0)
 
-        self.gan_power = gan_power = self.options['gan_power'] if not self.pretrain else 0.0
+        
 
         masked_training = self.options['masked_training']
         ct_mode = self.options['ct_mode']
         if ct_mode == 'none':
             ct_mode = None
 
-        models_opt_on_gpu = False if len(devices) == 0 else self.options['models_opt_on_gpu']
-        models_opt_device = '/GPU:0' if models_opt_on_gpu and self.is_training else '/CPU:0'
-        optimizer_vars_on_cpu = models_opt_device=='/CPU:0'
 
         input_ch=3
         bgr_shape = nn.get4Dshape(resolution,resolution,input_ch)
         mask_shape = nn.get4Dshape(resolution,resolution,1)
         self.model_filename_list = []
 
-        self.global_step = tf.train.get_or_create_global_step()
-        self.learning_rate = tf.compat.v1.train.exponential_decay(self.lr, self.global_step, self.decay_step, 0.96, staircase=True)
+
 
         with tf.device ('/CPU:0'):
             #Place holders on CPU
@@ -367,27 +397,7 @@ class LambdaSAEHDModel(ModelBase):
                 elif 'liae' in archi_type:
                     self.src_dst_trainable_weights = self.encoder.get_weights() + self.inter_AB.get_weights() + self.inter_B.get_weights() + self.decoder.get_weights()
                 
-                self.src_dst_opt = self.optimizer(learning_rate=self.learning_rate)
 
-                if self.use_amp:
-                    src_dst_loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
-                    self.src_dst_opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(self.src_dst_opt, loss_scale=src_dst_loss_scale)
-                    # pass
-
-                if self.options['true_face_power'] != 0:
-                    self.D_code_trainable_weights = self.code_discriminator.get_weights()
-                    self.D_code_opt = self.optimizer(learning_rate=self.learning_rate)
-                    if self.use_amp:
-                        D_code_loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
-                        self.D_code_opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(self.D_code_opt, loss_scale=D_code_loss_scale)
-                        # pass
-
-                if gan_power != 0:
-                    self.D_src_dst_trainable_weights = self.D_src.get_weights()+self.D_src_x2.get_weights()
-                    self.D_src_dst_opt = self.optimizer(learning_rate=self.learning_rate)
-                    if self.use_amp:
-                        D_src_dst_loss_scale = tf.train.experimental.DynamicLossScale(initial_loss_scale=2**10, increment_period=1000, multiplier=4.)
-                        self.D_src_dst_opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(self.D_src_dst_opt, loss_scale=D_src_dst_loss_scale)
                         # pass                    
 
         if self.is_training:
