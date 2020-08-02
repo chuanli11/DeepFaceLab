@@ -67,7 +67,7 @@ for idx in $GPU_IDXS; do
         echo $command_para
 
         flag_monitor=true
-        rm -rf $MODEL_DIR && rm -f ${MEM_NAME}".csv"
+        # rm -rf $MODEL_DIR && rm -f ${MEM_NAME}".csv"
         python main.py ${command_para} 2>&1 | tee $LOG_NAME".txt" &
         while $flag_monitor;
         do
