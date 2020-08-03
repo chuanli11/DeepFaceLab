@@ -5,13 +5,15 @@ import threading
 import time
 import numpy as np
 import itertools
+import math
 from pathlib import Path
 from core import pathex
 from core import imagelib
 import cv2
-import models
-from core.interact import interact as io
 
+import models
+
+from core.interact import interact as io
 from core.leras import nn
 from core.cv2ex import *
 from core.interact import interact as io
@@ -194,6 +196,10 @@ def trainerThread (s2c, c2s, e,
                                 model.warped_dst :warped_dst,
                                 model.target_dst :target_dst,
                                 model.target_dstm_all:target_dstm_all})
+
+                            src_loss = 2.0 if math.isnan(src_loss) else src_loss
+                            dst_loss = 2.0 if math.isnan(dst_loss) else dst_loss
+
                             list_loss = [float(src_loss), float(dst_loss)]
 
                             # Train face style
