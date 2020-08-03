@@ -47,7 +47,7 @@ for idx in $GPU_IDXS; do
         --no-preview \
         --model ${MODEL} \
         --force-gpu-idxs ${idx} \
-        --force-model-name ${MODEL_NAME} \
+        --force-model-name LIAE-UD-Weinstein-512-128-128 \
         --config-file benchmark/config/${config}.yaml \
         --target-iter ${TARGET_ITER} \
         --precision ${PRECISION} \

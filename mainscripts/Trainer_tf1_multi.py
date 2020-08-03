@@ -205,7 +205,7 @@ def trainerThread (s2c, c2s, e,
                                     model.warped_dst :warped_dst,
                                     model.target_dst :target_dst,
                                     model.target_dstm_all:target_dstm_all})
-                                list_loss.append(float(_D_code_loss))
+                                #list_loss.append(float(_D_code_loss))
 
                             # Train GAN
                             if model.options['gan_power'] != 0:
@@ -216,7 +216,7 @@ def trainerThread (s2c, c2s, e,
                                     model.warped_dst :warped_dst,
                                     model.target_dst :target_dst,
                                     model.target_dstm_all:target_dstm_all})
-                                list_loss.append(float(D_src_dst_loss))
+                                #list_loss.append(float(D_src_dst_loss))
 
                         # Train different parts of the network in parallel
                         # Less accurate gradient, Faster

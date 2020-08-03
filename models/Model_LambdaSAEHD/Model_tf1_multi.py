@@ -546,7 +546,7 @@ class LambdaSAEHDModel(ModelBase):
                     gpu_dst_losses += [gpu_dst_loss]
 
                     def DLoss(labels,logits):
-                        return tf.reduce_mean( tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits), axis=[1,2,3])
+                        return tf.reduce_mean( tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits + 0.00001), axis=[1,2,3])
 
                     if self.options['true_face_power'] != 0:
                         gpu_src_code_d = self.code_discriminator( gpu_src_code )
